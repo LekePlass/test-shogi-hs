@@ -1,0 +1,11 @@
+
+# exclude exts
+*.hi
+*.o
+
+# for STACK
+.stack-work/
+
+# for Editor
+*.swp
+*~
