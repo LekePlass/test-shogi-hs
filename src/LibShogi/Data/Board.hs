@@ -1,5 +1,5 @@
 module LibShogi.Data.Board 
-  ( Board(..)
+  ( Board (..)
   , board
   , index
   , (!)

@@ -1,5 +1,5 @@
 module LibShogi.Data.Shogi
-  ( ShogiKoma(..)
+  ( ShogiKoma (..)
   , nari
   , isNarikoma
   ) where
@@ -19,6 +19,23 @@ data ShogiKoma
   | KomaNarigin
   | KomaRyuou
   | KomaRyuma
+  deriving ( Eq, Ord )
+
+instance Show ShogiKoma where
+  show KomaFuhyo   = "歩"
+  show KomaKyosha  = "香"
+  show KomaKeima   = "桂"
+  show KomaGinsho  = "銀"
+  show KomaKinsho  = "金"
+  show KomaOusho   = "王"
+  show KomaHisha   = "飛"
+  show KomaKakugyo = "角"
+  show KomaTokin   = "と"
+  show KomaNarikyo = "杏"
+  show KomaNarikei = "圭"
+  show KomaNarigin = "全"
+  show KomaRyuou   = "龍"
+  show KomaRyuma   = "馬"
 
 nari :: ShogiKoma -> Maybe ShogiKoma
 nari KomaFuhyo   = Just KomaTokin

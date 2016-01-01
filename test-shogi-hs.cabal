@@ -33,6 +33,7 @@ library
                      , void
                      , array
                      , ansi-terminal
+                     , containers
   default-language:    Haskell2010
   ghc-options:         -Wall -fno-warn-type-defaults -fno-warn-unused-binds
 
