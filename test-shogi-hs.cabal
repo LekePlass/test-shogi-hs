@@ -16,6 +16,8 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     LibShogi.Data.Board
+                     , LibShogi.Data.Koma
+                     , LibShogi.Data.Shogi
                      , LibShogi.Data.ShogiBoard
   build-depends:       base >= 4.7 && < 5
                      , lens
@@ -32,7 +34,7 @@ library
                      , array
                      , ansi-terminal
   default-language:    Haskell2010
-  ghc-options:         -Wall -fno-warn-type-defaults
+  ghc-options:         -Wall -fno-warn-type-defaults -fno-warn-unused-binds
 
 executable test-shogi-hs-exe
   hs-source-dirs:      app
