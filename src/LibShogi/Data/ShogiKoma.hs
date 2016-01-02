@@ -1,6 +1,7 @@
-module LibShogi.Data.Shogi
+module LibShogi.Data.ShogiKoma
   ( ShogiKoma (..)
   , nari
+  , base
   , isNarikoma
   ) where
 
@@ -45,6 +46,15 @@ nari KomaGinsho  = Just KomaNarigin
 nari KomaHisha   = Just KomaRyuou
 nari KomaKakugyo = Just KomaRyuma
 nari _           = Nothing
+
+base :: ShogiKoma -> Maybe ShogiKoma
+base KomaTokin   = Just KomaFuhyo
+base KomaNarikyo = Just KomaKyosha
+base KomaNarikei = Just KomaKeima
+base KomaNarigin = Just KomaGinsho
+base KomaRyuou   = Just KomaHisha
+base KomaRyuma   = Just KomaKakugyo
+base _           = Nothing
 
 isNarikoma :: ShogiKoma -> Bool
 isNarikoma KomaTokin   = True

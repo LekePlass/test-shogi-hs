@@ -17,5 +17,3 @@ koma pid kv = Koma
   { player = pid
   , komaId = kv
   }
-
-

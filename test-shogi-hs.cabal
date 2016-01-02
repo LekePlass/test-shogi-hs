@@ -15,10 +15,11 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     LibShogi.Data.Board
-                     , LibShogi.Data.Koma
-                     , LibShogi.Data.Shogi
+  exposed-modules:     LibShogi.Data.Koma
+                     , LibShogi.Data.Board
+                     , LibShogi.Data.ShogiKoma
                      , LibShogi.Data.ShogiBoard
+                     , LibShogi.Data.ShogiStd
   build-depends:       base >= 4.7 && < 5
                      , lens
                      , record

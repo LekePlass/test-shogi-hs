@@ -1,5 +1,8 @@
 module LibShogi.Data.ShogiBoard 
-  ( shogiBoard
+  ( ShogiBoardKoma
+  , ShogiBoard
+  , shogiBoard
+  , ShogiOnHands
   , shogiOnHands
   , lookupOnHands
   , insertOnHands
@@ -11,7 +14,7 @@ import qualified Data.Map as Map
 
 import LibShogi.Data.Koma
 import LibShogi.Data.Board
-import LibShogi.Data.Shogi
+import LibShogi.Data.ShogiKoma
 
 type ShogiBoardKoma a = Koma a ShogiKoma
 type ShogiBoard a = Board (Maybe (ShogiBoardKoma a))
@@ -19,24 +22,37 @@ type ShogiBoard a = Board (Maybe (ShogiBoardKoma a))
 shogiBoard :: Ord a => Int -> Int -> ShogiBoard a
 shogiBoard w h = board w h Nothing
 
+lookupOnBoard :: Ord a => Int -> Int -> ShogiBoard a -> Maybe (ShogiBoardKoma a)
+lookupOnBoard r c b = b ! (r, c)
+
 type ShogiOnHand = Map.Map ShogiKoma Int
 type ShogiOnHands a = Map.Map a ShogiOnHand
 
 shogiOnHands :: Ord a => ShogiOnHands a
 shogiOnHands = Map.fromList []
 
-lookupOnHands :: Ord a => a -> ShogiOnHands a -> ShogiOnHand
-lookupOnHands pid ohs = case Map.lookup pid ohs of
-  Just x -> x
-  Nothing -> Map.fromList []
+lookupOnHands :: Ord a => a -> ShogiKoma -> ShogiOnHands a -> Int
+lookupOnHands pid sk ohs = maybe 0 id $ do
+  oh <- Map.lookup pid ohs
+  return $ lookupOnHand sk oh
 
 insertOnHands :: Ord a => a -> ShogiKoma -> ShogiOnHands a -> ShogiOnHands a
-insertOnHands pid sk ohs = Map.insert pid (insertOnHand sk $ lookupOnHands pid ohs) ohs
+insertOnHands pid sk ohs = Map.insert pid noh ohs
+  where
+    noh = maybe (Map.fromList [(sk, 1)]) id $ do
+      oh <- Map.lookup pid ohs
+      return $ insertOnHand sk oh
 
 pickupOnHands :: Ord a => a -> ShogiKoma -> ShogiOnHands a -> Maybe (ShogiOnHands a)
 pickupOnHands pid sk ohs = do
-  oh <- pickupOnHand sk $ lookupOnHands pid ohs
-  return $ Map.insert pid oh ohs
+  oh <- Map.lookup pid ohs
+  poh <- pickupOnHand sk oh
+  return $ Map.insert pid poh ohs
+
+assocsOnHands :: Ord a => a -> ShogiOnHands a -> [(ShogiKoma, Int)]
+assocsOnHands pid ohs = maybe [] id $ do
+  oh <- Map.lookup pid ohs
+  return $ Map.assocs oh
 
 lookupOnHand :: ShogiKoma -> ShogiOnHand -> Int
 lookupOnHand sk oh = maybe 0 id $ Map.lookup sk oh
@@ -54,4 +70,3 @@ data ShogiComp a = ShogiComp
   , onhands :: ShogiOnHands a
   }
   deriving ( Eq, Show )
-
