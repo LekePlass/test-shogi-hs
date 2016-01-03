@@ -2,6 +2,7 @@ module LibShogi.Data.ShogiBoard
   ( ShogiBoardKoma
   , ShogiBoard
   , shogiBoard
+  , lookupOnBoard
   , ShogiOnHands
   , shogiOnHands
   , lookupOnHands

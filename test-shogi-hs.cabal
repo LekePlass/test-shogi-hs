@@ -21,6 +21,7 @@ library
                      , LibShogi.Data.ShogiBoard
                      , LibShogi.Data.ShogiStd
                      , LibShogiCUI.ShogiCUI
+                     , LibShogiCUI.ShogiParseUtils
   build-depends:       base >= 4.7 && < 5
                      , lens
                      , record
@@ -36,8 +37,11 @@ library
                      , array
                      , ansi-terminal
                      , containers
+                     , attoparsec
+                     , transformers
+                     , transformers-base
   default-language:    Haskell2010
-  ghc-options:         -Wall -fno-warn-type-defaults -fno-warn-unused-binds
+  ghc-options:         -Wall -fno-warn-type-defaults -fno-warn-unused-binds -fno-warn-unused-do-bind
 
 executable test-shogi-hs-exe
   hs-source-dirs:      app
@@ -45,6 +49,7 @@ executable test-shogi-hs-exe
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , test-shogi-hs
+                     , attoparsec
   default-language:    Haskell2010
 
 test-suite test-shogi-hs-test

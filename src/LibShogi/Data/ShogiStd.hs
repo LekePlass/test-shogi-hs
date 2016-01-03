@@ -5,6 +5,7 @@ module LibShogi.Data.ShogiStd
   , StdShogiMoveAction (..)
   , move
   , stdMoveKoma
+  , canNariKoma
   ) where
 
 import Control.Lens
@@ -23,62 +24,64 @@ type StdShogiComp = ShogiComp StdShogiPlayer
 
 stdShogiIni :: [((Int, Int), Maybe (ShogiBoardKoma StdShogiPlayer))]
 stdShogiIni = 
-  [ ((0, 0), komaSente KomaKyosha  )
-  , ((1, 0), komaSente KomaKeima   )
-  , ((2, 0), komaSente KomaGinsho  )
-  , ((3, 0), komaSente KomaKinsho  )
-  , ((4, 0), komaSente KomaOusho   )
-  , ((5, 0), komaSente KomaKinsho  )
-  , ((6, 0), komaSente KomaGinsho  )
-  , ((7, 0), komaSente KomaKeima   )
-  , ((8, 0), komaSente KomaKyosha  )
-  , ((1, 1), komaSente KomaHisha   )
-  , ((7, 1), komaSente KomaKakugyo )
-  , ((0, 2), komaSente KomaFuhyo   )
-  , ((1, 2), komaSente KomaFuhyo   )
-  , ((2, 2), komaSente KomaFuhyo   )
-  , ((3, 2), komaSente KomaFuhyo   )
-  , ((4, 2), komaSente KomaFuhyo   )
-  , ((5, 2), komaSente KomaFuhyo   )
-  , ((6, 2), komaSente KomaFuhyo   )
-  , ((7, 2), komaSente KomaFuhyo   )
-  , ((8, 2), komaSente KomaFuhyo   )
-  , ((0, 6), komaGote  KomaFuhyo   )
-  , ((1, 6), komaGote  KomaFuhyo   )
-  , ((2, 6), komaGote  KomaFuhyo   )
-  , ((3, 6), komaGote  KomaFuhyo   )
-  , ((4, 6), komaGote  KomaFuhyo   )
-  , ((5, 6), komaGote  KomaFuhyo   )
-  , ((6, 6), komaGote  KomaFuhyo   )
-  , ((7, 6), komaGote  KomaFuhyo   )
-  , ((8, 6), komaGote  KomaFuhyo   )
-  , ((1, 7), komaGote  KomaKakugyo )
-  , ((7, 7), komaGote  KomaHisha   )
-  , ((0, 8), komaGote  KomaKyosha  )
-  , ((1, 8), komaGote  KomaKeima   )
-  , ((2, 8), komaGote  KomaGinsho  )
-  , ((3, 8), komaGote  KomaKinsho  )
-  , ((4, 8), komaGote  KomaOusho   )
-  , ((5, 8), komaGote  KomaKinsho  )
-  , ((6, 8), komaGote  KomaGinsho  )
-  , ((7, 8), komaGote  KomaKeima   )
-  , ((8, 8), komaGote  KomaKyosha  )
+  [ ((1, 1), komaSente KomaKyosha  )
+  , ((2, 1), komaSente KomaKeima   )
+  , ((3, 1), komaSente KomaGinsho  )
+  , ((4, 1), komaSente KomaKinsho  )
+  , ((5, 1), komaSente KomaOsho    )
+  , ((6, 1), komaSente KomaKinsho  )
+  , ((7, 1), komaSente KomaGinsho  )
+  , ((8, 1), komaSente KomaKeima   )
+  , ((9, 1), komaSente KomaKyosha  )
+  , ((2, 2), komaSente KomaKakugyo )
+  , ((8, 2), komaSente KomaHisha   )
+  , ((1, 3), komaSente KomaFuhyo   )
+  , ((2, 3), komaSente KomaFuhyo   )
+  , ((3, 3), komaSente KomaFuhyo   )
+  , ((4, 3), komaSente KomaFuhyo   )
+  , ((5, 3), komaSente KomaFuhyo   )
+  , ((6, 3), komaSente KomaFuhyo   )
+  , ((7, 3), komaSente KomaFuhyo   )
+  , ((8, 3), komaSente KomaFuhyo   )
+  , ((9, 3), komaSente KomaFuhyo   )
+  , ((1, 7), komaGote  KomaFuhyo   )
+  , ((2, 7), komaGote  KomaFuhyo   )
+  , ((3, 7), komaGote  KomaFuhyo   )
+  , ((4, 7), komaGote  KomaFuhyo   )
+  , ((5, 7), komaGote  KomaFuhyo   )
+  , ((6, 7), komaGote  KomaFuhyo   )
+  , ((7, 7), komaGote  KomaFuhyo   )
+  , ((8, 7), komaGote  KomaFuhyo   )
+  , ((9, 7), komaGote  KomaFuhyo   )
+  , ((8, 8), komaGote  KomaKakugyo )
+  , ((2, 8), komaGote  KomaHisha   )
+  , ((1, 9), komaGote  KomaKyosha  )
+  , ((2, 9), komaGote  KomaKeima   )
+  , ((3, 9), komaGote  KomaGinsho  )
+  , ((4, 9), komaGote  KomaKinsho  )
+  , ((5, 9), komaGote  KomaOsho    )
+  , ((6, 9), komaGote  KomaKinsho  )
+  , ((7, 9), komaGote  KomaGinsho  )
+  , ((8, 9), komaGote  KomaKeima   )
+  , ((9, 9), komaGote  KomaKyosha  )
   ]
   where
     komaSente = Just . koma SentePlayer
     komaGote  = Just . koma GotePlayer
 
+isStdRange :: (Int, Int) -> Bool
+isStdRange (r, c) = 1 <= r && r <= 9 && 1 <= c && c <= 9
+
 reverseIdx :: (Int, Int) -> (Int, Int)
-reverseIdx (r, c) = (8 - r, 8 - c)
+reverseIdx (r, c) = (10 - r, 10 - c)
 
 reverseIdxByPlayer :: StdShogiPlayer -> (Int, Int) -> (Int, Int)
 reverseIdxByPlayer SentePlayer = id
 reverseIdxByPlayer GotePlayer  = reverseIdx
 
 canMove :: StdShogiPlayer -> (Int, Int) -> StdShogiComp -> Bool
-canMove pid idx@(r, c) sc = isRange && isOwn
+canMove pid idx sc = isStdRange idx && isOwn
   where
-    isRange = 0 <= r && r <= 8 && 0 <= c && c <= 8
     isOwn = maybe True not $ isOwnKoma pid idx sc
 
 filterCanMove :: StdShogiPlayer -> StdShogiComp -> [(Int, Int)] -> [(Int, Int)]
@@ -98,15 +101,12 @@ moveKomaByDir pid idx sc dir = idxsT ^. _1 ++ filterCanMove pid sc [head $ idxsT
     b = onboard sc
     
     idxsT = span canMove' $ tail $ iterate (addTuple dir) idx
-    
     addTuple idx1 (r, c) = idx1 & _1 %~ (+ r) & _2 %~ (+ c)
     
     canMove' :: (Int, Int) -> Bool
-    canMove' (-1, _ ) = False
-    canMove' (_ , -1) = False
-    canMove' (9 , _ ) = False
-    canMove' (_ , 9 ) = False
-    canMove' sidx = b ! sidx == Nothing
+    canMove' sidx = if isStdRange sidx
+      then b ! sidx == Nothing
+      else False
 
 stdMoveKoma' :: StdShogiPlayer -> ShogiKoma -> (Int, Int) -> StdShogiComp -> [(Int, Int)]
 stdMoveKoma' pid KomaFuhyo   idx sc = idxs
@@ -134,11 +134,11 @@ stdMoveKoma' pid KomaKinsho  idx sc = idxs
     idxs = moveKomaByRange pid idx sc rs
     rs = [(0, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
 
-stdMoveKoma' pid KomaOusho   idx sc = idxs
+stdMoveKoma' pid KomaOsho    idx sc = idxs
   where
     idxs = moveKomaByRange pid idx sc rs
     rs = [ (-1, -1), (0, -1), (1, -1)
-         , (-1,  0), (0,  0), (1,  0)
+         , (-1,  0)         , (1,  0)
          , (-1,  1), (0,  1), (1,  1)
          ]
 
@@ -172,7 +172,7 @@ stdMoveKoma' pid KomaNarigin idx sc = idxs
     idxs = moveKomaByRange pid idx sc rs
     rs = [(0, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
 
-stdMoveKoma' pid KomaRyuou   idx sc = idxsR ++ idxsD
+stdMoveKoma' pid KomaRyuo    idx sc = idxsR ++ idxsD
   where
     idxsR = moveKomaByRange pid idx sc rs
     rs = [(-1, -1), (-1, 1), (1, 1), (1, -1)]
@@ -264,8 +264,8 @@ canMoveOnBoard pid idx1 idx2 sk sc = (maybe False id $ do
       return $ ksk == bsk)
     
     canChRange :: StdShogiPlayer -> (Int, Int) -> Bool
-    canChRange SentePlayer (_, x) = x >= 6
-    canChRange GotePlayer  (_, x) = x <= 2
+    canChRange SentePlayer (_, x) = x >= 7
+    canChRange GotePlayer  (_, x) = x <= 3
 
 canMoveOnHands :: StdShogiPlayer -> (Int, Int) -> ShogiKoma -> StdShogiComp -> Bool
 canMoveOnHands pid idx sk sc = ohc > 0 &&
@@ -282,3 +282,10 @@ isOwnKoma pid idx sc = do
   return $ pid == player psk
   where
     b = onboard sc
+
+canNariKoma :: StdShogiPlayer -> (Int, Int) -> (Int, Int) -> StdShogiComp -> Maybe ShogiKoma
+canNariKoma pid idx1 idx2 sc = do
+  sk <- onboard sc ! idx1
+  nsk <- nari $ komaId sk
+  move pid (ShogiMoveOnBoard idx1 idx2 nsk) sc
+  return nsk

@@ -23,19 +23,19 @@ instance Show a => Show (Board a) where
     where
       showItem x y = show $ arr Arr.! (x, y)
       
-      showLine' 0 y = showItem 0 y
+      showLine' 1 y = showItem 1 y
       showLine' x y = showLine' (x - 1) y ++ ", " ++ showItem x y
-      showLine x = "[" ++ showLine' (w - 1) x ++ "]"
+      showLine x = "[" ++ showLine' w x ++ "]"
       
-      showStr' 0 = showLine 0
+      showStr' 1 = showLine 1
       showStr' x = showStr' (x - 1) ++ ", " ++ showLine x
-      showStr = "[" ++ showStr' (h - 1) ++ "]"
+      showStr = "[" ++ showStr' h ++ "]"
 
 board :: Int -> Int -> a -> Board a
 board w h i = Board
   { width  = w
   , height = h
-  , items  = Arr.listArray ((0, 0), (w - 1, h - 1)) $
+  , items  = Arr.listArray ((1, 1), (w, h)) $
     iterate id i
   }
 
