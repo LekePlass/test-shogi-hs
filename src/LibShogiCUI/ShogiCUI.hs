@@ -10,6 +10,7 @@ module LibShogiCUI.ShogiCUI
   , showJaNumber
   , printConsoleShogi
   , getConsoleMove
+  , game
   ) where
 
 import           Data.List
@@ -166,19 +167,20 @@ intertrans :: [a] -> [a] -> [a] -> [[a]] -> [a]
 intertrans f b c xss = f ++ intercalate c xss ++ b
 
 intertransText :: T.Text -> T.Text -> T.Text -> [T.Text] -> T.Text
+intertransText f b _ [] = f `T.append` b
 intertransText f b c xs = f `T.append`
   foldl1 (\x y -> x `T.append` c `T.append` y) xs `T.append` b
 
 printConsoleShogi :: StdShogiComp -> IO ()
 printConsoleShogi sc = do
-    printOnHand ColorBlack SentePlayer
-    putStrLn ""
-    printOnBoard $ Map.fromList $
-      [ (SentePlayer, (ColorBlack, ColorDarkRed))
-      , (GotePlayer , (ColorGray , ColorRed    ))
-      ]
-    putStrLn ""
-    printOnHand ColorGray GotePlayer
+  printOnHand ColorBlack SentePlayer
+  putStrLn ""
+  printOnBoard $ Map.fromList $
+    [ (SentePlayer, (ColorBlack, ColorDarkRed))
+    , (GotePlayer , (ColorGray , ColorRed    ))
+    ]
+  putStrLn ""
+  printOnHand ColorGray GotePlayer
   where
     bo = onboard sc
     ohs = onhands sc
@@ -210,7 +212,7 @@ printConsoleShogi sc = do
     
     showKomaLine :: PlayerColorMap -> Int -> T.Text
     showKomaLine m h = intertransText showLengthLine showLengthLine showLengthLine $
-      [showConsoleKoma m $ lookupOnBoard w h bo | w <- [1..9] ]
+      [showConsoleKoma m $ lookupOnBoard (10 - w) h bo | w <- [1..9] ]
     
     showLengthLine = showBorder BorderLength
     
@@ -229,9 +231,9 @@ printConsoleShogi sc = do
     bottomBorders = (BorderLeftBottom, BorderCenterBottom, BorderRightBottom)
     centerBorders = (BorderCenterLeft, BorderCenter, BorderCenterRight)
 
-
-getConsoleMove :: IO (Maybe SPUs.ConsoleShogiMoveAction)
-getConsoleMove = do
+-- TODO: rewrite using State
+getConsoleMove :: T.Text -> IO (Maybe SPUs.ConsoleShogiMoveAction)
+getConsoleMove s = do
   let loop i | i < 5 = do
         ans <- askAction
         let res = SPUs.parseMoveAction $ T.pack ans
@@ -239,7 +241,6 @@ getConsoleMove = do
           return res
         else
           do
-            putStrLn $ show res
             printWarning
             loop $ i + 1
       loop _ = do
@@ -248,7 +249,7 @@ getConsoleMove = do
   loop 0
   where
     askAction = do
-      putStr "act> "
+      TextIO.putStr $ s `T.append` T.pack "> "
       x <- getLine
       return x
     
@@ -257,3 +258,45 @@ getConsoleMove = do
       putStrLn " - (Int, Int); (Int, Int)[; Koma]"
       putStrLn " - (Int, Int); Koma"
 
+-- TODO: rewrite using State
+game :: StdShogiComp -> IO ()
+game isc = do
+  let loop i sc | i `mod` 2 == 0 = do
+        printConsoleShogi sc
+        putStrLn ""
+        let pid = SentePlayer
+        ans <- getConsoleMove $ showPlayer pid
+        case ans of
+          Nothing   -> return ()
+          Just cact -> case moveSCKoma pid cact sc of
+            Nothing  -> do
+              putStrLn "動きが不正です"
+              putStrLn ""
+              loop i sc
+            Just nsc -> do
+              putStrLn ""
+              loop (i + 1) nsc
+      loop i sc = do
+        let pid = GotePlayer
+        let f idx@(r, c) = (idx, stdMoveKoma idx sc, lookupOnBoard r c $ onboard sc)
+        let mss = map f [ (x, y) | x <- [1..9], y <- [1..9] ]
+        let isOwn msk = maybe True (\sk -> player sk /= pid) msk
+        let ms = head $ dropWhile (\(_, xs, msk) -> xs == [] || isOwn msk) mss
+        case move pid (ShogiMoveOnBoard (ms ^. _1) (head $ ms ^. _2) (maybe KomaFuhyo komaId $ ms ^. _3)) sc of
+          Just nsc -> loop (i + 1) nsc
+          _        -> do
+            putStrLn $ show ms
+            return ()
+  loop 0 isc
+  where
+    moveSCKoma :: StdShogiPlayer -> SPUs.ConsoleShogiMoveAction -> StdShogiComp -> Maybe StdShogiComp
+    moveSCKoma pid cact sc = do
+      act <- convCR cact sc
+      move pid act sc
+    
+    convCR :: SPUs.ConsoleShogiMoveAction -> StdShogiComp -> Maybe StdShogiMoveAction
+    convCR (SPUs.CSActionOnBoard (r, c) idx2 Nothing) sc = do
+      sk <- lookupOnBoard r c $ onboard sc
+      return $ ShogiMoveOnBoard (r, c) idx2 $ komaId sk
+    convCR (SPUs.CSActionOnBoard idx1 idx2 (Just sk)) _  = Just $ ShogiMoveOnBoard idx1 idx2 sk
+    convCR (SPUs.CSActionOnHand idx sk)               _  = Just $ ShogiMoveOnHand idx sk
