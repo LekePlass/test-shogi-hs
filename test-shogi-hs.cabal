@@ -20,6 +20,7 @@ library
                      , LibShogi.Data.ShogiKoma
                      , LibShogi.Data.ShogiBoard
                      , LibShogi.Data.ShogiStd
+                     , LibShogiCUI.ShogiCUI
   build-depends:       base >= 4.7 && < 5
                      , lens
                      , record

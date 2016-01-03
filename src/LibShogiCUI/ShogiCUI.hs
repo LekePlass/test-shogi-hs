@@ -2,7 +2,9 @@ module LibShogiCUI.ShogiCUI
   ( printConsoleShogi
   ) where
 
-import qualified System.Console.ANSI as ConsoleA
+import qualified System.Console.ANSI as ConsoleA ()
+import           Control.Lens
+import           Data.List
 
 import LibShogi.Data.ShogiKoma
 import LibShogi.Data.ShogiBoard
@@ -26,11 +28,27 @@ showKoma _           KomaNarigin = "全"
 showKoma _           KomaRyuou   = "龍"
 showKoma _           KomaRyuma   = "馬"
 
+showPlayer :: StdShogiPlayer -> String
+showPlayer SentePlayer = "先手"
+showPlayer GotePlayer  = "後手"
+
 printConsoleShogi :: StdShogiComp -> IO ()
-printConsoleShogi sc = 
+printConsoleShogi sc = printOnHands SentePlayer
   where
     b = onboard sc
     ohs = onhands sc
     
     printOnHands :: StdShogiPlayer -> IO ()
-    printOnHands pid = assocsOnHands pid ohs
+    printOnHands pid = do
+      let xs = map (showKomaOnHand pid) $ assocsOnHands pid ohs
+      let xss = map (^. _1) $ iterate (\(_, ys) -> splitAt 4 ys) ([], xs)
+      let xssz = zip xss $ showPlayer pid:iterate id "    "
+      foldl (\x s -> x >> putOnHandLine s) (putOnHandLine $ head xssz) $
+        takeWhile (\(arr, _) -> arr /= []) $ tail xssz
+    
+    showKomaOnHand :: StdShogiPlayer -> (ShogiKoma, Int) -> String
+    showKomaOnHand pid (k, i) = showKoma pid k ++ "x" ++ show i
+    
+    putOnHandLine :: ([String], String) -> IO ()
+    putOnHandLine (xss, h) = do
+      putStrLn $ h ++ ": " ++ intercalate ", " xss

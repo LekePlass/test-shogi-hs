@@ -7,6 +7,7 @@ module LibShogi.Data.ShogiBoard
   , lookupOnHands
   , insertOnHands
   , pickupOnHands
+  , assocsOnHands
   , ShogiComp (..)
   ) where
 
