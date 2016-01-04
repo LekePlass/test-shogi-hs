@@ -1,0 +1,33 @@
+language: c
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.stack
+    - $HOME/.cabal
+    - $HOME/.ghc
+
+notifications:
+  email: false
+
+addons:
+  apt:
+    packages:
+      - cabal-install-1.22
+      - ghc-7.10.2
+    sources:
+      - hvr-ghc
+
+before_install:
+  - mkdir -p $HOME/.local/bin
+  - export PATH=$HOME/.local/bin:$PATH
+  - export STACK_VERSION=1.0.0
+  - travis_retry curl -L "https://github.com/commercialhaskell/stack/releases/download/v${STACK_VERSION}/stack-${STACK_VERSION}-linux-x86_64.tar.gz" | tar xvzf - "stack-${STACK_VERSION}-linux-x86_64/stack" -O > $HOME/.local/bin/stack
+  - chmod +x $HOME/.local/bin/stack
+  - stack setup
+
+install:
+  - stack --no-terminal --skip-ghc-check build --only-snapshot
+
+script:
+  - stack --no-terminal --skip-ghc-check test --only-snapshot
