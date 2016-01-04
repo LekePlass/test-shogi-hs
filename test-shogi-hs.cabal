@@ -22,6 +22,10 @@ library
                      , LibShogi.Data.ShogiStd
                      , LibShogiCUI.ShogiCUI
                      , LibShogiCUI.ShogiParseUtils
+                     , LibLSSP.Comps.Base
+                     , LibLSSP.Comps.Connect
+                     , LibLSSP.Parsers.Base
+                     , LibLSSP.Parsers.Connect
   build-depends:       base >= 4.7 && < 5
                      , lens
                      , record
