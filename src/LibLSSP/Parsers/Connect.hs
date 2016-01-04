@@ -1,5 +1,6 @@
 module LibLSSP.Parsers.Connect
   ( protocol
+  , allowDataFormats
   ) where
 
 import           Control.Applicative
@@ -30,6 +31,6 @@ allowDataFormats = AParsec.many' PB.dataFormat <|> return [defaultDataFormat]
   AParsec.<?> "allow data formats"
   where
     defaultDataFormat = Base.DataFormatInfo
-      { name = "plain"
-      , version = Base.Version3 1 0 0
+      { Base.name = T.pack "plain"
+      , Base.version = Base.Version3 1 0 0
       }
