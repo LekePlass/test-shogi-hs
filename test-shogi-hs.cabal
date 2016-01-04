@@ -25,9 +25,11 @@ library
                      , LibLSSP.Comps.Base
                      , LibLSSP.Comps.Connect
                      , LibLSSP.Comps.RuleConsensus
+                     , LibLSSP.Comps.GameCommunicate
                      , LibLSSP.Parsers.Base
                      , LibLSSP.Parsers.Connect
                      , LibLSSP.Parsers.RuleConsensus
+                     , LibLSSP.Parsers.GameCommunicate
   build-depends:       base >= 4.7 && < 5
                      , lens
                      , text

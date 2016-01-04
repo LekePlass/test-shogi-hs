@@ -5,7 +5,6 @@ module LibLSSP.Parsers.RuleConsensus
   ) where
 
 import           Control.Applicative
-import           Control.Monad
 import           Data.Aeson
 import           Data.Maybe (catMaybes)
 import qualified Data.Text as T
@@ -17,13 +16,24 @@ import qualified LibLSSP.Parsers.Base as PB
 instance FromJSON SetOptionsInfo where
   parseJSON (Object v)
     = SetOptionsInfo
-    <$> v .: T.pack "rules"
-  parseJSON _           = mzero
+    <$> PB.paramOr (v .:) (T.pack "rules")
+  parseJSON _           = empty
 
 instance ToJSON SetOptionsInfo where
   toJSON v = object
     [ T.pack "rules" .= rules v
     ]
+
+ruleMode :: AParsec.Parser RuleMode
+ruleMode = declaration <|> customize
+  where
+    declaration :: AParsec.Parser RuleMode
+    declaration = (AParsec.string $ T.pack "declaration")
+      *> return Declaration AParsec.<?> "declaration"
+    
+    customize :: AParsec.Parser RuleMode
+    customize = (AParsec.string $ T.pack "customize")
+      *> return Customize AParsec.<?> "customize"
 
 ruleDeclaration :: AParsec.Parser RuleDeclarationInfo
 ruleDeclaration = RuleDeclarationInfo
@@ -43,19 +53,19 @@ ruleDeclaration = RuleDeclarationInfo
 instance FromJSON RuleCustomizeInfo where
   parseJSON (Object v)
     = RuleCustomizeInfo
-    <$> v .: T.pack "isWaiting"
-  parseJSON _           = mzero
+    <$> PB.paramOr (v .:) (T.pack "is_waiting")
+  parseJSON _           = empty
 
 instance ToJSON RuleCustomizeInfo where
   toJSON v = object
-    [ T.pack "isWaiting" .= isWaiting v
+    [ T.pack "is_waiting" .= isWaiting v
     ]
 
 instance FromJSON InitialContext where
   parseJSON (Object v)
     = InitialContext
-    <$> (v .:? T.pack "maxMoves" <|> v .:? T.pack "max_moves")
-  parseJSON _           = mzero
+    <$> PB.paramOr (v .:) (T.pack "max_moves")
+  parseJSON _           = empty
 
 instance ToJSON InitialContext where
   toJSON v = object $ catMaybes

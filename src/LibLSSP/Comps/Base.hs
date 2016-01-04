@@ -19,3 +19,4 @@ data DataFormatInfo = DataFormatInfo
   { name :: T.Text
   , version :: Version
   }
+  deriving ( Eq, Show, Ord )

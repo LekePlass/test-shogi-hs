@@ -11,4 +11,3 @@ data ProtocolInfo = ProtocolInfo
   , version :: Version
   }
   deriving ( Eq, Show, Ord )
-
