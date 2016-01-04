@@ -7,6 +7,9 @@ cache:
     - $HOME/.cabal
     - $HOME/.ghc
 
+notifications:
+  email: false
+
 addons:
   apt:
     packages:
