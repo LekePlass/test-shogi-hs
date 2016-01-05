@@ -3,7 +3,7 @@ module LibLSSP.Senders.Connect
   , allowDataFormatsCommand
   ) where
 
-import Data.Text as T
+import qualified Data.Text as T
 
 import qualified LibLSSP.Comps.Base as Base
 import           LibLSSP.Comps.Connect
@@ -19,4 +19,4 @@ protocolCommand pinfo = withend
 allowDataFormatsCommand :: [Base.DataFormatInfo] -> T.Text
 allowDataFormatsCommand dfs = withend
   $          T.pack "Allow-Data-Formats: "
-  `T.append` map Base.showTDataFormat dfs
+  `T.append` (T.intercalate (T.pack " ") $ map showTDataFormat dfs)

@@ -10,6 +10,7 @@ import qualified Data.Text as T
 import           Data.Maybe (catMaybes)
 
 import qualified LibLSSP.Parsers.Base as PB
+import qualified LibLSSP.Comps.Base as Base
 import           LibLSSP.Comps.GameCommunicate
 
 instance FromJSON GameContext where
@@ -25,7 +26,7 @@ instance ToJSON GameContext where
     where
       maybeElem k ma = (k .=) <$> ma
 
-gameTime :: AParsec.Parser Int
+gameTime :: AParsec.Parser Base.Time
 gameTime = PB.seconds AParsec.<?> "game time"
 
 gameActionMode :: AParsec.Parser GameAction
@@ -95,7 +96,7 @@ gameKoma = do
       | s == T.pack "RY" = return KomaRyuo
       | otherwise        = empty
 
-gameStopTime :: AParsec.Parser Int
+gameStopTime :: AParsec.Parser Base.Time
 gameStopTime = PB.seconds AParsec.<?> "game stop time"
 
 gameStatus :: AParsec.Parser GameStatus

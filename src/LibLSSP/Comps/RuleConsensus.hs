@@ -4,6 +4,7 @@ module LibLSSP.Comps.RuleConsensus
   , RuleDeclarationInfo (..)
   , RuleCustomizeInfo (..)
   , InitialContext (..)
+  , RuleConsensusInfo (..)
   ) where
 
 import qualified Data.Text as T
@@ -35,3 +36,7 @@ data InitialContext = InitialContext
   { maxMoves :: Maybe Int
   }
   deriving ( Eq, Show, Ord )
+
+data RuleConsensusInfo
+  = ConsensusAgree
+  | ConsensusReject

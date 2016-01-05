@@ -32,6 +32,9 @@ library
                      , LibLSSP.Parsers.RuleConsensus
                      , LibLSSP.Parsers.GameCommunicate
                      , LibLSSP.Parsers.GameEnd
+                     , LibLSSP.Senders.Base
+                     , LibLSSP.Senders.Connect
+                     , LibLSSP.Senders.RuleConsensus
   build-depends:       base >= 4.7 && < 5
                      , lens
                      , text

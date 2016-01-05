@@ -81,8 +81,8 @@ dataFormat = Base.DataFormatInfo
     asciiLD = asciiLetter <|> asciiDigit
     asciiLDS = asciiLD <|> asciiAllowSym
 
-seconds :: AParsec.Parser Int
-seconds = AParsec.decimal
+seconds :: AParsec.Parser Base.Time
+seconds = Base.Seconds <$> AParsec.decimal
 
 lineValue :: AParsec.Parser T.Text
 lineValue = do

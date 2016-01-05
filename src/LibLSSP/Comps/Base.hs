@@ -2,6 +2,7 @@ module LibLSSP.Comps.Base
   ( Version (..)
   , convertVersion3
   , DataFormatInfo (..)
+  , Time (..)
   ) where
 
 import qualified Data.Text as T
@@ -26,3 +27,5 @@ data DataFormatInfo = DataFormatInfo
   , version :: Version
   }
   deriving ( Eq, Show, Ord )
+
+data Time = Seconds Int

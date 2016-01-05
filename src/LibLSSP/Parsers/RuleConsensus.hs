@@ -10,6 +10,7 @@ import           Data.Maybe (catMaybes)
 import qualified Data.Text as T
 import qualified Data.Attoparsec.Text as AParsec
 
+import qualified LibLSSP.Comps.Base as Base
 import           LibLSSP.Comps.RuleConsensus
 import qualified LibLSSP.Parsers.Base as PB
 
@@ -74,16 +75,16 @@ instance ToJSON InitialContext where
     where
       maybeElem k ma = (k .=) <$> ma
 
-consensusTime :: AParsec.Parser Int
+consensusTime :: AParsec.Parser Base.Time
 consensusTime = PB.seconds AParsec.<?> "consensus time"
 
-ruleConsensus :: AParsec.Parser Bool
-ruleConsensus = agree <|> reject
+ruleConsensus :: AParsec.Parser RuleConsensusInfo
+ruleConsensus = agree <|> reject AParsec.<?> "rule consensus"
   where
-    agree :: AParsec.Parser Bool
+    agree :: AParsec.Parser RuleConsensusInfo
     agree = (AParsec.string $ T.pack "agree")
-      *> return True AParsec.<?> "agree"
+      *> return ConsensusAgree AParsec.<?> "agree"
     
-    reject :: AParsec.Parser Bool
+    reject :: AParsec.Parser RuleConsensusInfo
     reject = (AParsec.string $ T.pack "reject")
-      *> return False AParsec.<?> "reject"
+      *> return ConsensusReject AParsec.<?> "reject"
