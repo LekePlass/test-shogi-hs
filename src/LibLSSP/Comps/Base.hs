@@ -3,6 +3,7 @@ module LibLSSP.Comps.Base
   , convertVersion3
   , DataFormatInfo (..)
   , Time (..)
+  , DetailInfo (..)
   ) where
 
 import qualified Data.Text as T
@@ -29,3 +30,9 @@ data DataFormatInfo = DataFormatInfo
   deriving ( Eq, Show, Ord )
 
 data Time = Seconds Int
+
+data DetailInfo = DetailInfo
+  { detailType :: T.Text
+  , message :: Maybe T.Text
+  , detailMessage :: Maybe T.Text
+  }

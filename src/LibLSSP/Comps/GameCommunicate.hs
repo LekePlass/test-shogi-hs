@@ -4,6 +4,7 @@ module LibLSSP.Comps.GameCommunicate
   , GameKoma (..)
   , GameActionMoveInfo (..)
   , GameStatus (..)
+  , GameStatusResult (..)
   ) where
 
 data GameContext = GameContext
@@ -60,3 +61,7 @@ data GameStatus
   = GameContinue
   | GameEnd
   deriving ( Eq, Show, Ord )
+
+data GameStatusResult = GameStatusResult
+  { useTime :: Maybe Int
+  }
