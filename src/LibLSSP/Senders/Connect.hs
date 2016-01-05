@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module LibLSSP.Senders.Connect
   ( protocolCommand
   , allowDataFormatsCommand
@@ -11,12 +13,12 @@ import           LibLSSP.Senders.Base
 
 protocolCommand :: ProtocolInfo -> T.Text
 protocolCommand pinfo = withend
-  $          T.pack "Protocol: "
+  $          "Protocol: "
   `T.append` name pinfo
   `T.append` T.singleton '/'
   `T.append` (showTVersion $ version pinfo)
 
 allowDataFormatsCommand :: [Base.DataFormatInfo] -> T.Text
 allowDataFormatsCommand dfs = withend
-  $          T.pack "Allow-Data-Formats: "
-  `T.append` (T.intercalate (T.pack " ") $ map showTDataFormat dfs)
+  $          "Allow-Data-Formats: "
+  `T.append` (T.intercalate " " $ map showTDataFormat dfs)

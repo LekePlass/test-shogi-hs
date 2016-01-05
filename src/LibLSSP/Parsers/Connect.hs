@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module LibLSSP.Parsers.Connect
   ( protocol
   , allowDataFormats
@@ -31,6 +33,6 @@ allowDataFormats = AParsec.many' PB.dataFormat <|> return [defaultDataFormat]
   AParsec.<?> "allow data formats"
   where
     defaultDataFormat = Base.DataFormatInfo
-      { Base.name = T.pack "plain"
+      { Base.name = "plain"
       , Base.version = Base.Version3 1 0 0
       }

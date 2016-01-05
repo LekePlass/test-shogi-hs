@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module LibLSSP.Parsers.Base
   ( lexeme
   , paramOr
@@ -94,7 +96,7 @@ lineValue = do
     uniExcludeFmt = uniDigit <|> uniLetter <|> uniMark <|> uniPunctuation <|> uniSymbol
 
 crlf :: AParsec.Parser T.Text
-crlf = AParsec.string $ T.pack "\r\n"
+crlf = AParsec.string "\r\n"
 
 asciiLowerLetter :: AParsec.Parser Char
 asciiLowerLetter = AParsec.satisfy isAsciiLowerLetter AParsec.<?> "ascii lower letter"

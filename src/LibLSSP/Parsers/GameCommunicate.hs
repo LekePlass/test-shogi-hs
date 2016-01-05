@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module LibLSSP.Parsers.GameCommunicate
   ( GameContext (..)
   , gameTime
@@ -16,12 +18,12 @@ import           LibLSSP.Comps.GameCommunicate
 instance FromJSON GameContext where
   parseJSON (Object v)
     = GameContext
-    <$> PB.paramOr (v .:) (T.pack "max_moves")
+    <$> PB.paramOr (v .:) "max_moves"
   parseJSON _           = empty
 
 instance ToJSON GameContext where
   toJSON v = object $ catMaybes
-    [ T.pack "max_moves" `maybeElem` maxMoves v
+    [ maybeElem "max_moves" $ maxMoves v
     ]
     where
       maybeElem k ma = (k .=) <$> ma
@@ -34,19 +36,19 @@ gameActionMode = moveAction <|> resignAction <|> mateAction <|> extraAction
   AParsec.<?> "game action mode"
   where
     moveAction :: AParsec.Parser GameAction
-    moveAction = (AParsec.string $ T.pack "move")
+    moveAction = AParsec.string "move"
       *> return MoveAction AParsec.<?> "move"
     
     resignAction :: AParsec.Parser GameAction
-    resignAction = (AParsec.string $ T.pack "resign")
+    resignAction = AParsec.string "resign"
       *> return ResignAction AParsec.<?> "resign"
     
     mateAction :: AParsec.Parser GameAction
-    mateAction = (AParsec.string $ T.pack "mate")
+    mateAction = AParsec.string "mate"
       *> return MateAction AParsec.<?> "mate"
     
     extraAction :: AParsec.Parser GameAction
-    extraAction = (AParsec.string $ T.pack "extra")
+    extraAction = AParsec.string "extra"
       *> return ExtraAction AParsec.<?> "extra"
 
 gameActionMove :: AParsec.Parser GameActionMoveInfo
@@ -80,20 +82,20 @@ gameKoma = do
   where
     chKomaStr :: T.Text -> AParsec.Parser GameKoma
     chKomaStr s 
-      | s == T.pack "FU" = return KomaFuhyo
-      | s == T.pack "KY" = return KomaKyosha
-      | s == T.pack "KE" = return KomaKeima
-      | s == T.pack "GI" = return KomaGinsho
-      | s == T.pack "KI" = return KomaKinsho
-      | s == T.pack "KA" = return KomaKakugyo
-      | s == T.pack "HI" = return KomaHisha
-      | s == T.pack "OU" = return KomaOsho
-      | s == T.pack "TO" = return KomaTokin
-      | s == T.pack "NY" = return KomaNarikyo
-      | s == T.pack "NK" = return KomaNarikei
-      | s == T.pack "NG" = return KomaNarigin
-      | s == T.pack "UM" = return KomaRyuma
-      | s == T.pack "RY" = return KomaRyuo
+      | s == "FU" = return KomaFuhyo
+      | s == "KY" = return KomaKyosha
+      | s == "KE" = return KomaKeima
+      | s == "GI" = return KomaGinsho
+      | s == "KI" = return KomaKinsho
+      | s == "KA" = return KomaKakugyo
+      | s == "HI" = return KomaHisha
+      | s == "OU" = return KomaOsho
+      | s == "TO" = return KomaTokin
+      | s == "NY" = return KomaNarikyo
+      | s == "NK" = return KomaNarikei
+      | s == "NG" = return KomaNarigin
+      | s == "UM" = return KomaRyuma
+      | s == "RY" = return KomaRyuo
       | otherwise        = empty
 
 gameStopTime :: AParsec.Parser Base.Time
@@ -103,9 +105,9 @@ gameStatus :: AParsec.Parser GameStatus
 gameStatus = continue <|> end AParsec.<?> "game status"
   where
     continue :: AParsec.Parser GameStatus
-    continue = (AParsec.string $ T.pack "continue")
+    continue = AParsec.string "continue"
       *> return GameContinue AParsec.<?> "continue"
     
     end :: AParsec.Parser GameStatus
-    end = (AParsec.string $ T.pack "end")
+    end = AParsec.string "end"
       *> return GameEnd AParsec.<?> "end"

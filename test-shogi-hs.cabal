@@ -3,7 +3,7 @@ version:             0.1.0.0
 synopsis:            Initial project template from stack
 description:         Please see README.md
 homepage:            http://github.com/githubuser/test-shogi-hs#readme
-license:             BSD3
+license:             MIT
 license-file:        LICENSE
 author:              Mizunashi Mana
 maintainer:          mizunashi_mana@mma.club.uec.ac.jp
@@ -48,6 +48,7 @@ library
                      , aeson
                      , charset
                      , mtl
+                     , conduit
   default-language:    Haskell2010
   ghc-options:         -Wall -fno-warn-type-defaults -fno-warn-unused-binds -fno-warn-unused-do-bind -fno-warn-orphans
 
@@ -58,6 +59,8 @@ executable test-shogi-hs-exe
   build-depends:       base
                      , test-shogi-hs
                      , attoparsec
+                     , conduit
+                     , conduit-extra
   default-language:    Haskell2010
 
 test-suite test-shogi-hs-test

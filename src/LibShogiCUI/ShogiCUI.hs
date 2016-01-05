@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module LibShogiCUI.ShogiCUI 
   ( ConsoleColor (..)
   , color
@@ -78,24 +80,24 @@ colorText c s = packSGRCode [color2ForeSGR $ color c] `T.append`
 
 -- showKoma = show :: (ShogiKoma -> String)
 showKoma :: StdShogiPlayer -> ShogiKoma -> T.Text
-showKoma _           KomaFuhyo   = T.pack "歩"
-showKoma _           KomaKyosha  = T.pack "香"
-showKoma _           KomaKeima   = T.pack "桂"
-showKoma _           KomaGinsho  = T.pack "銀"
-showKoma _           KomaKinsho  = T.pack "金"
-showKoma SentePlayer KomaOsho    = T.pack "王"
-showKoma GotePlayer  KomaOsho    = T.pack "玉"
-showKoma _           KomaHisha   = T.pack "飛"
-showKoma _           KomaKakugyo = T.pack "角"
-showKoma _           KomaTokin   = T.pack "と"
-showKoma _           KomaNarikyo = T.pack "杏"
-showKoma _           KomaNarikei = T.pack "圭"
-showKoma _           KomaNarigin = T.pack "全"
-showKoma _           KomaRyuo    = T.pack "龍"
-showKoma _           KomaRyuma   = T.pack "馬"
+showKoma _           KomaFuhyo   = "歩"
+showKoma _           KomaKyosha  = "香"
+showKoma _           KomaKeima   = "桂"
+showKoma _           KomaGinsho  = "銀"
+showKoma _           KomaKinsho  = "金"
+showKoma SentePlayer KomaOsho    = "王"
+showKoma GotePlayer  KomaOsho    = "玉"
+showKoma _           KomaHisha   = "飛"
+showKoma _           KomaKakugyo = "角"
+showKoma _           KomaTokin   = "と"
+showKoma _           KomaNarikyo = "杏"
+showKoma _           KomaNarikei = "圭"
+showKoma _           KomaNarigin = "全"
+showKoma _           KomaRyuo    = "龍"
+showKoma _           KomaRyuma   = "馬"
 
 showConsoleKoma :: PlayerColorMap -> Maybe (ShogiBoardKoma StdShogiPlayer) -> T.Text
-showConsoleKoma _  Nothing  = T.pack "　"
+showConsoleKoma _  Nothing  = "　"
 showConsoleKoma pm (Just k) = colorText c $ showKoma pid kid
   where
     pid = player k
@@ -117,51 +119,51 @@ data TblBorder
   | BorderCenterBottom
 
 showBorder :: TblBorder -> T.Text
-showBorder BorderLeftTop      = T.pack "┌"
-showBorder BorderRightTop     = T.pack "┐"
-showBorder BorderLeftBottom   = T.pack "└"
-showBorder BorderRightBottom  = T.pack "┘"
-showBorder BorderCenter       = T.pack "┼"
-showBorder BorderSide         = T.pack "─"
-showBorder BorderLength       = T.pack "│"
-showBorder BorderCenterTop    = T.pack "┬"
-showBorder BorderCenterBottom = T.pack "┴"
-showBorder BorderCenterLeft   = T.pack "├"
-showBorder BorderCenterRight  = T.pack "┤"
+showBorder BorderLeftTop      = "┌"
+showBorder BorderRightTop     = "┐"
+showBorder BorderLeftBottom   = "└"
+showBorder BorderRightBottom  = "┘"
+showBorder BorderCenter       = "┼"
+showBorder BorderSide         = "─"
+showBorder BorderLength       = "│"
+showBorder BorderCenterTop    = "┬"
+showBorder BorderCenterBottom = "┴"
+showBorder BorderCenterLeft   = "├"
+showBorder BorderCenterRight  = "┤"
 
 showPlayer :: StdShogiPlayer -> T.Text
-showPlayer SentePlayer = T.pack "先手"
-showPlayer GotePlayer  = T.pack "後手"
+showPlayer SentePlayer = "先手"
+showPlayer GotePlayer  = "後手"
 
 showEmNumber :: Int -> T.Text
-showEmNumber 0 = T.pack "０"
-showEmNumber 1 = T.pack "１"
-showEmNumber 2 = T.pack "２"
-showEmNumber 3 = T.pack "３"
-showEmNumber 4 = T.pack "４"
-showEmNumber 5 = T.pack "５"
-showEmNumber 6 = T.pack "６"
-showEmNumber 7 = T.pack "７"
-showEmNumber 8 = T.pack "８"
-showEmNumber 9 = T.pack "９"
+showEmNumber 0 = "０"
+showEmNumber 1 = "１"
+showEmNumber 2 = "２"
+showEmNumber 3 = "３"
+showEmNumber 4 = "４"
+showEmNumber 5 = "５"
+showEmNumber 6 = "６"
+showEmNumber 7 = "７"
+showEmNumber 8 = "８"
+showEmNumber 9 = "９"
 showEmNumber x
   | x >= 0     = showEmNumber (x `div` 10) `T.append` showEmNumber (x `mod` 10)
-  | otherwise  = T.pack "ー" `T.append` showEmNumber (-x) 
+  | otherwise  = "ー" `T.append` showEmNumber (-x) 
 
 showJaNumber :: Int -> T.Text
-showJaNumber 0 = T.pack "〇"
-showJaNumber 1 = T.pack "一"
-showJaNumber 2 = T.pack "二"
-showJaNumber 3 = T.pack "三"
-showJaNumber 4 = T.pack "四"
-showJaNumber 5 = T.pack "五"
-showJaNumber 6 = T.pack "六"
-showJaNumber 7 = T.pack "七"
-showJaNumber 8 = T.pack "八"
-showJaNumber 9 = T.pack "九"
+showJaNumber 0 = "〇"
+showJaNumber 1 = "一"
+showJaNumber 2 = "二"
+showJaNumber 3 = "三"
+showJaNumber 4 = "四"
+showJaNumber 5 = "五"
+showJaNumber 6 = "六"
+showJaNumber 7 = "七"
+showJaNumber 8 = "八"
+showJaNumber 9 = "九"
 showJaNumber x
   | x >= 0     = showJaNumber (x `div` 10) `T.append` showJaNumber (x `mod` 10)
-  | otherwise  = T.pack "マイナス" `T.append` showJaNumber (-x)
+  | otherwise  = "マイナス" `T.append` showJaNumber (-x)
 
 intertrans :: [a] -> [a] -> [a] -> [[a]] -> [a]
 intertrans f b c xss = f ++ intercalate c xss ++ b
@@ -189,17 +191,17 @@ printConsoleShogi sc = do
     printOnHand cc pid = do
       let xs = map (showKomaOnHand cc pid) $ assocsOnHands pid ohs
       let xss = [ x | (x, _) <- iterate (\(_, ys) -> splitAt 4 ys) ([], xs) ]
-      let xssz = zip xss $ showPlayer pid:iterate id (T.pack "    ")
+      let xssz = zip xss $ showPlayer pid:iterate id "    "
       foldl (\x s -> x >> putOnHandLine s) (putOnHandLine $ head xssz) $
         takeWhile (\(arr, _) -> arr /= []) $ tail xssz
     
     showKomaOnHand :: ConsoleColor -> StdShogiPlayer -> (ShogiKoma, Int) -> T.Text
-    showKomaOnHand cc pid (k, i) = colorText cc (showKoma pid k) `T.append` T.pack "x" `T.append` SPUs.showText i
+    showKomaOnHand cc pid (k, i) = colorText cc (showKoma pid k) `T.append` "x" `T.append` SPUs.showText i
     
     putOnHandLine :: ([T.Text], T.Text) -> IO ()
     putOnHandLine (xss, h) = do
-      TextIO.putStrLn $ h `T.append` T.pack ": " `T.append`
-        intertransText SPUs.noText SPUs.noText (T.pack ", ") xss
+      TextIO.putStrLn $ h `T.append` ": " `T.append`
+        T.intercalate ", " xss
     
     printOnBoard :: PlayerColorMap -> IO ()
     printOnBoard m = do
@@ -208,7 +210,7 @@ printConsoleShogi sc = do
           borderLineByData topBorders] [
           borderLineByData bottomBorders] [
           borderLineByData centerBorders] $
-        [[showKomaLine m h `T.append` T.pack " " `T.append` showJaNumber h] | h <- [1..9]]
+        [[showKomaLine m h `T.append` " " `T.append` showJaNumber h] | h <- [1..9]]
     
     showKomaLine :: PlayerColorMap -> Int -> T.Text
     showKomaLine m h = intertransText showLengthLine showLengthLine showLengthLine $
@@ -216,7 +218,7 @@ printConsoleShogi sc = do
     
     showLengthLine = showBorder BorderLength
     
-    emNumLine = intertransText (T.pack " ") SPUs.noText (T.pack " ") $ 
+    emNumLine = intertransText " " "" " " $ 
       [ showEmNumber s | s <- take 9 $ iterate (subtract 1) 9]
     
     borderLine :: T.Text -> T.Text -> T.Text -> T.Text
@@ -236,7 +238,7 @@ getConsoleMove :: T.Text -> IO (Maybe SPUs.ConsoleShogiMoveAction)
 getConsoleMove s = do
   let loop i | i < 5 = do
         ans <- askAction
-        let res = SPUs.parseMoveAction $ T.pack ans
+        let res = SPUs.parseMoveAction ans
         if res /= Nothing then
           return res
         else
@@ -249,9 +251,9 @@ getConsoleMove s = do
   loop 0
   where
     askAction = do
-      TextIO.putStr $ s `T.append` T.pack "> "
+      TextIO.putStr $ s `T.append` "> "
       x <- getLine
-      return x
+      return $ T.pack x
     
     printWarning = do
       putStrLn "不正な入力です:"

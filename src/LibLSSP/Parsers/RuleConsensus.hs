@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module LibLSSP.Parsers.RuleConsensus
   ( SetOptionsInfo (..)
   , ruleDeclaration
@@ -17,23 +19,23 @@ import qualified LibLSSP.Parsers.Base as PB
 instance FromJSON SetOptionsInfo where
   parseJSON (Object v)
     = SetOptionsInfo
-    <$> PB.paramOr (v .:) (T.pack "rules")
+    <$> PB.paramOr (v .:) "rules"
   parseJSON _           = empty
 
 instance ToJSON SetOptionsInfo where
   toJSON v = object
-    [ T.pack "rules" .= rules v
+    [ "rules" .= rules v
     ]
 
 ruleMode :: AParsec.Parser RuleMode
 ruleMode = declaration <|> customize
   where
     declaration :: AParsec.Parser RuleMode
-    declaration = (AParsec.string $ T.pack "declaration")
+    declaration = AParsec.string "declaration"
       *> return Declaration AParsec.<?> "declaration"
     
     customize :: AParsec.Parser RuleMode
-    customize = (AParsec.string $ T.pack "customize")
+    customize = AParsec.string "customize"
       *> return Customize AParsec.<?> "customize"
 
 ruleDeclaration :: AParsec.Parser RuleDeclarationInfo
@@ -54,23 +56,23 @@ ruleDeclaration = RuleDeclarationInfo
 instance FromJSON RuleCustomizeInfo where
   parseJSON (Object v)
     = RuleCustomizeInfo
-    <$> PB.paramOr (v .:) (T.pack "is_waiting")
+    <$> PB.paramOr (v .:) "is_waiting"
   parseJSON _           = empty
 
 instance ToJSON RuleCustomizeInfo where
   toJSON v = object
-    [ T.pack "is_waiting" .= isWaiting v
+    [ "is_waiting" .= isWaiting v
     ]
 
 instance FromJSON InitialContext where
   parseJSON (Object v)
     = InitialContext
-    <$> PB.paramOr (v .:) (T.pack "max_moves")
+    <$> PB.paramOr (v .:) "max_moves"
   parseJSON _           = empty
 
 instance ToJSON InitialContext where
   toJSON v = object $ catMaybes
-    [ T.pack "max_moves" `maybeElem` maxMoves v
+    [ maybeElem "max_moves" $ maxMoves v
     ]
     where
       maybeElem k ma = (k .=) <$> ma
@@ -82,9 +84,9 @@ ruleConsensus :: AParsec.Parser RuleConsensusInfo
 ruleConsensus = agree <|> reject AParsec.<?> "rule consensus"
   where
     agree :: AParsec.Parser RuleConsensusInfo
-    agree = (AParsec.string $ T.pack "agree")
+    agree = AParsec.string "agree"
       *> return ConsensusAgree AParsec.<?> "agree"
     
     reject :: AParsec.Parser RuleConsensusInfo
-    reject = (AParsec.string $ T.pack "reject")
+    reject = AParsec.string "reject"
       *> return ConsensusReject AParsec.<?> "reject"

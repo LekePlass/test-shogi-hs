@@ -1,6 +1,7 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module LibShogiCUI.ShogiParseUtils 
-  ( noText
-  , showText
+  ( showText
   , ConsoleShogiMoveAction (..)
   , parseMoveAction
   , parserMoveAction
@@ -10,44 +11,43 @@ module LibShogiCUI.ShogiParseUtils
 
 import qualified Data.Attoparsec.Text as AParsec
 import qualified Data.List as List
-import           Data.Text (pack, Text, toUpper)
+import qualified Data.Text as T
 import           Control.Applicative
 
 import LibShogi.Data.ShogiKoma
 
-noText :: Text
-noText = pack ""
-
-showText :: Show a => a -> Text
-showText = pack . show
+showText :: Show a => a -> T.Text
+showText = T.pack . show
 
 data ConsoleShogiMoveAction
   = CSActionOnBoard (Int, Int) (Int, Int) (Maybe ShogiKoma)
   | CSActionOnHand  (Int, Int) ShogiKoma
   deriving ( Eq, Ord, Show )
 
-parseMoveAction :: Text -> Maybe ConsoleShogiMoveAction
-parseMoveAction s = case AParsec.parseOnly parserMoveAction $ toUpper s of
+parseMoveAction :: T.Text -> Maybe ConsoleShogiMoveAction
+parseMoveAction s = case AParsec.parseOnly parserMoveAction $ T.toUpper s of
   Right x -> Just x
   _       -> Nothing
 
 parserMoveAction :: AParsec.Parser ConsoleShogiMoveAction
-parserMoveAction = 
-  (CSActionOnBoard
-  <$> (AParsec.skipSpace *> lexeme point <* lexemeSemicol)
-  <*> lexeme point
-  <*> ((lexemeSemicol *> (Just <$> lexeme koma)) <|> return Nothing)
-  ) <|> (CSActionOnHand
-  <$> (AParsec.skipSpace *> lexeme point <* lexemeSemicol)
-  <*> lexeme koma
-  )
+parserMoveAction = csactionOnBoard <|> csactionOnHand
   where  
     lexeme p = p <* AParsec.skipSpace
     lexemeSemicol = lexeme $ AParsec.char ';'
+    
+    csactionOnBoard = CSActionOnBoard
+      <$> (AParsec.skipSpace *> lexeme point <* lexemeSemicol)
+      <*> lexeme point
+      <*> ((lexemeSemicol *> (Just <$> lexeme koma)) <|> return Nothing)
+    
+    csactionOnHand = CSActionOnHand
+      <$> (AParsec.skipSpace *> lexeme point <* lexemeSemicol)
+      <*> lexeme koma
 
 koma :: AParsec.Parser ShogiKoma
 koma = List.foldl1 (<|>) convKomaParsers
   where
+    convKomaList :: [([T.Text], ShogiKoma)]
     convKomaList =
       [ (["P", "FU", "FUHYO", "歩", "歩兵"], KomaFuhyo)
       , (["+P", "TO", "TOKIN", "と", "と金"], KomaTokin)
@@ -66,7 +66,7 @@ koma = List.foldl1 (<|>) convKomaParsers
       ]
     
     convKomaParsers =
-      [ List.foldl1 (<|>) [ AParsec.string $ pack kStr | kStr <- kStrs] *> return k
+      [ List.foldl1 (<|>) [ AParsec.string kStr | kStr <- kStrs] *> return k
       | (kStrs, k) <- convKomaList
       ]
 
@@ -81,4 +81,3 @@ point = (AParsec.char '(' *> mtuple <* AParsec.char ')') <|> mtuple
       x <- p <* AParsec.char ','
       let f y = (x, y)
       f <$> p
-    

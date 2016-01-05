@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module LibLSSP.Senders.Base
   ( showTVersion
   , showTDataFormat
@@ -23,7 +25,7 @@ showTTime :: Base.Time -> T.Text
 showTTime (Base.Seconds ti) = T.pack $ show ti
 
 crlfText :: T.Text
-crlfText = T.pack "\r\n"
+crlfText = "\r\n"
 
 withend :: T.Text -> T.Text
 withend s = s `T.append` crlfText
