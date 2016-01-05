@@ -1,5 +1,10 @@
 module LibLSSP.Senders.RuleConsensus
   ( ruleIntensionCommand
+  , ruleModeCommand
+  , ruleDeclarationCommand
+  , dataFormatCommand
+  , consensusTimeCommand
+  , ruleConsensusCommand
   ) where
 
 import qualified Data.Text as T
@@ -10,8 +15,7 @@ import           LibLSSP.Senders.Base
 
 ruleIntensionCommand :: T.Text -> T.Text
 ruleIntensionCommand s = withend
-  $          T.pack "Rule-Intension: "
-  `T.append` s
+  $ T.pack "Rule-Intension: " `T.append` s
 
 ruleModeCommand :: RuleMode -> T.Text
 ruleModeCommand Declaration = withend 
@@ -36,4 +40,8 @@ consensusTimeCommand ct = withend
   $          T.pack "Consensus-Time?: "
   `T.append` showTTime ct
 
---ruleConsensusCommand :: 
+ruleConsensusCommand :: RuleConsensusInfo -> T.Text
+ruleConsensusCommand ConsensusAgree  = withend
+  $ T.pack "Rule-Consensus: agree"
+ruleConsensusCommand ConsensusReject = withend
+  $ T.pack "Rule-Consensus: reject"

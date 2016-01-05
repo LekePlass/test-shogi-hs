@@ -35,6 +35,9 @@ library
                      , LibLSSP.Senders.Base
                      , LibLSSP.Senders.Connect
                      , LibLSSP.Senders.RuleConsensus
+                     , LibLSSP.Senders.GameStart
+                     , LibLSSP.Senders.GameCommunicate
+                     , LibLSSP.Senders.GameEnd
   build-depends:       base >= 4.7 && < 5
                      , lens
                      , text
@@ -44,6 +47,7 @@ library
                      , attoparsec
                      , aeson
                      , charset
+                     , mtl
   default-language:    Haskell2010
   ghc-options:         -Wall -fno-warn-type-defaults -fno-warn-unused-binds -fno-warn-unused-do-bind -fno-warn-orphans
 
