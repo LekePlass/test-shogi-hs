@@ -1,22 +1,26 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts    #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeFamilies        #-}
 
 module LibLSSP.DataFormats.Json where
 
+import           Control.Applicative
 import           Data.Aeson
 import           Data.Aeson.Types
-import qualified Data.Attoparsec.Text as AParsec
-import qualified Data.Char as Char
-import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
-import qualified Data.Text.Lazy.Encoding as EL
-import           Data.Maybe (catMaybes)
-import           Control.Applicative
+import qualified Data.Attoparsec.ByteString    as ABParsec
+import qualified Data.Attoparsec.Text          as AParsec
+import qualified Data.Attoparsec.Types         as AParsecT
+import qualified Data.Char                     as Char
+import           Data.Maybe                    (catMaybes)
+import qualified Data.Text                     as T
+import qualified Data.Text.Encoding            as E
+import qualified Data.Text.Lazy                as TL
+import qualified Data.Text.Lazy.Encoding       as EL
 
-import qualified LibLSSP.Comps.Base as CB
-import qualified LibLSSP.Comps.RuleConsensus as CRC
+import qualified LibLSSP.Comps.Base            as CB
 import qualified LibLSSP.Comps.GameCommunicate as CGC
+import qualified LibLSSP.Comps.RuleConsensus   as CRC
 import           LibLSSP.DataFormats.Base
 
 data LSSP_JSON = LSSP_JSON_1_0_0
@@ -29,8 +33,29 @@ instance DataFormat LSSP_JSON where
   info LSSP_JSON_1_0_0 = CB.DataFormatInfo dfName $ CB.Version3 1 0 0
 
 instance DetailDataFormat LSSP_JSON where
+  type DetailDataStruct LSSP_JSON = Value
   toDetail _ obj = result defaultDetail id $ fromJSON obj
-  fromDetail _ dinfo = toJSON dinfo
+  fromDetail _ = toJSON
+
+instance ToDataFormat LSSP_JSON where
+  toData _ = encodeText
+  toDetailInfo _ = encodeText
+  toDetailData _ = encodeText
+  toSetOptions _ = encodeText
+  toRuleCustomize _ = encodeText
+  toInitialContext _ = encodeText
+  toGameContext _ = encodeText
+  toGameStatusResult _ = encodeText
+
+instance FromDataFormat LSSP_JSON where
+  parseData _ = jsonText
+  parseDetailInfo _ = parseJSONText
+  parseDetailData _ = jsonText
+  parseSetOptions _ = parseJSONText
+  parseRuleCustomize _ = parseJSONText
+  parseInitialContext _ = parseJSONText
+  parseGameContext _ = parseJSONText
+  parseGameStatusResult _ = parseJSONText
 
 result :: b -> (a -> b) -> Result a -> b
 result x _ (Error _)   = x
@@ -39,6 +64,32 @@ result _ f (Success x) = f x
 encodeText :: ToJSON a => a -> T.Text
 encodeText v = TL.toStrict $ EL.decodeUtf8 $ encode v
 
+jsonText :: AParsec.Parser Value
+jsonText = aparseABParse json
+  where
+    aparseABParse :: ABParsec.Parser a -> AParsec.Parser a
+    aparseABParse p = do
+      AParsec.take 0
+      aparseResult $ ABParsec.parse p ""
+
+    aparseResult :: ABParsec.Result a -> AParsec.Parser a
+    aparseResult (AParsecT.Fail _ []    _) = empty
+    aparseResult (AParsecT.Fail _ (e:_) _) = fail e
+    aparseResult (AParsecT.Done _ r)       = return r
+    aparseResult (AParsecT.Partial f)      = do
+      x <- AParsec.take 1
+      aparseResult $ f $ E.encodeUtf8 x
+
+parseJSONText :: forall a. FromJSON a => AParsec.Parser a
+parseJSONText = do
+  v <- jsonText
+  aparseJSON v
+  where
+    aparseJSON :: Value -> AParsec.Parser a
+    aparseJSON v = case fromJSON v of
+      Error   s -> fail s
+      Success a -> return a
+
 paramOr :: Alternative f => (T.Text -> f a) -> T.Text -> f a
 paramOr f s = f s <|> maybe empty f (conv s)
   where
@@ -46,7 +97,7 @@ paramOr f s = f s <|> maybe empty f (conv s)
     conv ss = case AParsec.parseOnly repUnderbar ss of
       Right x -> Just x
       _       -> Nothing
-    
+
     repUnderbar = do
       xs <- AParsec.takeTill (== '_')
       xss <- AParsec.many' $ do
@@ -118,4 +169,15 @@ instance FromJSON CGC.GameContext where
 instance ToJSON CGC.GameContext where
   toJSON v = object $ catMaybes
     [ "max_moves" `elemMaybe` CGC.maxMoves v
+    ]
+
+instance FromJSON CGC.GameStatusResult where
+  parseJSON (Object v)
+    = CGC.GameStatusResult
+    <$> paramOr (v .:) "use_time"
+  parseJSON _ = empty
+
+instance ToJSON CGC.GameStatusResult where
+  toJSON v = object $ catMaybes
+    [ "use_time" `elemMaybe` CGC.useTime v
     ]
