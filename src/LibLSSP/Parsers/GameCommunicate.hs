@@ -6,27 +6,12 @@ module LibLSSP.Parsers.GameCommunicate
   ) where
 
 import           Control.Applicative
-import           Data.Aeson
 import qualified Data.Attoparsec.Text as AParsec
 import qualified Data.Text as T
-import           Data.Maybe (catMaybes)
 
 import qualified LibLSSP.Parsers.Base as PB
 import qualified LibLSSP.Comps.Base as Base
 import           LibLSSP.Comps.GameCommunicate
-
-instance FromJSON GameContext where
-  parseJSON (Object v)
-    = GameContext
-    <$> PB.paramOr (v .:) "max_moves"
-  parseJSON _           = empty
-
-instance ToJSON GameContext where
-  toJSON v = object $ catMaybes
-    [ maybeElem "max_moves" $ maxMoves v
-    ]
-    where
-      maybeElem k ma = (k .=) <$> ma
 
 gameTime :: AParsec.Parser Base.Time
 gameTime = PB.seconds AParsec.<?> "game time"

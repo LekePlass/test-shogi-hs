@@ -2,7 +2,6 @@
 
 module LibLSSP.Parsers.Base
   ( lexeme
-  , paramOr
   , version
   , dataFormat
   , seconds
@@ -24,7 +23,6 @@ module LibLSSP.Parsers.Base
 
 import           Control.Applicative
 import qualified Data.Attoparsec.Text as AParsec
-import qualified Data.Char as Char
 import qualified Data.Text as T
 import qualified Data.CharSet as CS
 import qualified Data.CharSet.Unicode.Category as UCS
@@ -33,22 +31,6 @@ import qualified LibLSSP.Comps.Base as Base
 
 lexeme :: AParsec.Parser a -> AParsec.Parser a
 lexeme p = p <* AParsec.skipSpace
-
-paramOr :: Alternative f => (T.Text -> f a) -> T.Text -> f a
-paramOr f s = f s <|> maybe empty f (conv s)
-  where
-    conv :: T.Text -> Maybe T.Text
-    conv ss = case AParsec.parseOnly repUnderbar ss of
-      Right x -> Just x
-      _       -> Nothing
-    
-    repUnderbar = do
-      xs <- AParsec.takeTill (== '_')
-      xss <- AParsec.many' $ do
-        y <- AParsec.char '_' *> AParsec.letter
-        ys <- AParsec.takeTill (== '_')
-        return $ T.cons (Char.toUpper y) ys
-      return $ foldl T.append xs xss
 
 version :: AParsec.Parser Base.Version
 version = maybeV *> (version3a <|> version3) AParsec.<?> "version"

@@ -1,8 +1,15 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module LibLSSP.DataFormats.Base
-  ( 
+  ( defaultDetail
+  , DataFormat (..)
+  , DetailDataFormat (..)
+  , ToDataFormat (..)
+  , FromDataFormat (..)
+  , Convertable (..)
+  , DetailConvertable (..)
   ) where
 
 import qualified Data.Text as T
@@ -11,6 +18,9 @@ import qualified Data.Attoparsec.Text as AParsec
 import qualified LibLSSP.Comps.Base as CB
 import qualified LibLSSP.Comps.RuleConsensus as CRC
 import qualified LibLSSP.Comps.GameCommunicate as CGC
+
+defaultDetail :: CB.DetailInfo
+defaultDetail = CB.DetailInfo "none" Nothing Nothing
 
 class DataFormat df where
   type DataStruct df
@@ -78,3 +88,9 @@ class DetailDataFormat df => FromDataFormat df where
   
   parseGameEndDetail :: df -> AParsec.Parser (DetailDataStruct df)
 
+class (DataFormat df1, DataFormat df2) => Convertable df1 df2 where
+  convert :: df1 -> df2 -> (DataStruct df1) -> (DataStruct df2)
+
+class (DetailDataFormat df1, DetailDataFormat df2) => DetailConvertable df1 df2 where
+  convertDetail :: df1 -> df2 -> (DetailDataStruct df1) -> (DetailDataStruct df2)
+  convertDetail dfmt1 dfmt2 = fromDetail dfmt2 . toDetail dfmt1
