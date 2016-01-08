@@ -6,12 +6,12 @@ module LibLSSP.Parsers.GameCommunicate
   ) where
 
 import           Control.Applicative
-import qualified Data.Attoparsec.Text as AParsec
-import qualified Data.Text as T
+import qualified Data.Attoparsec.Text          as AParsec
+import qualified Data.Text                     as T
 
-import qualified LibLSSP.Parsers.Base as PB
-import qualified LibLSSP.Comps.Base as Base
+import qualified LibLSSP.Comps.Base            as Base
 import           LibLSSP.Comps.GameCommunicate
+import qualified LibLSSP.Parsers.Base          as PB
 
 gameTime :: AParsec.Parser Base.Time
 gameTime = PB.seconds AParsec.<?> "game time"
@@ -23,15 +23,15 @@ gameActionMode = moveAction <|> resignAction <|> mateAction <|> extraAction
     moveAction :: AParsec.Parser GameAction
     moveAction = AParsec.string "move"
       *> return MoveAction AParsec.<?> "move"
-    
+
     resignAction :: AParsec.Parser GameAction
     resignAction = AParsec.string "resign"
       *> return ResignAction AParsec.<?> "resign"
-    
+
     mateAction :: AParsec.Parser GameAction
     mateAction = AParsec.string "mate"
       *> return MateAction AParsec.<?> "mate"
-    
+
     extraAction :: AParsec.Parser GameAction
     extraAction = AParsec.string "extra"
       *> return ExtraAction AParsec.<?> "extra"
@@ -53,7 +53,7 @@ komaPoint = beginBr *> mtuple <* endBr
   where
     beginBr = PB.lexeme $ AParsec.char '('
     endBr   = AParsec.char ')'
-    
+
     mtuple = do
       let p = PB.lexeme AParsec.decimal
       x <- p <* AParsec.char ','
@@ -66,7 +66,7 @@ gameKoma = do
   chKomaStr xs AParsec.<?> "game koma"
   where
     chKomaStr :: T.Text -> AParsec.Parser GameKoma
-    chKomaStr s 
+    chKomaStr s
       | s == "FU" = return KomaFuhyo
       | s == "KY" = return KomaKyosha
       | s == "KE" = return KomaKeima
@@ -92,7 +92,7 @@ gameStatus = continue <|> end AParsec.<?> "game status"
     continue :: AParsec.Parser GameStatus
     continue = AParsec.string "continue"
       *> return GameContinue AParsec.<?> "continue"
-    
+
     end :: AParsec.Parser GameStatus
     end = AParsec.string "end"
       *> return GameEnd AParsec.<?> "end"

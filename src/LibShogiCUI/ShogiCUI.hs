@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module LibShogiCUI.ShogiCUI 
+module LibShogiCUI.ShogiCUI
   ( ConsoleColor (..)
   , color
   , colorText
@@ -15,17 +15,17 @@ module LibShogiCUI.ShogiCUI
   , game
   ) where
 
-import           Data.List
-import qualified Data.Map as Map
-import qualified Data.Text as T
-import qualified Data.Text.IO as TextIO
 import           Control.Lens
-import qualified System.Console.ANSI as CA
+import           Data.List
+import qualified Data.Map                    as Map
+import qualified Data.Text                   as T
+import qualified Data.Text.IO                as TextIO
+import qualified System.Console.ANSI         as CA
 
-import LibShogi.Data.Koma
-import LibShogi.Data.ShogiKoma
-import LibShogi.Data.ShogiBoard
-import LibShogi.Data.ShogiStd
+import           LibShogi.Data.Koma
+import           LibShogi.Data.ShogiBoard
+import           LibShogi.Data.ShogiKoma
+import           LibShogi.Data.ShogiStd
 
 import qualified LibShogiCUI.ShogiParseUtils as SPUs
 
@@ -74,7 +74,7 @@ colorText c s = packSGRCode [color2ForeSGR $ color c] `T.append`
   where
     color2ForeSGR :: (CA.ColorIntensity, CA.Color) -> CA.SGR
     color2ForeSGR (ci, cl) = CA.SetColor CA.Foreground ci cl
-    
+
     packSGRCode :: [CA.SGR] -> T.Text
     packSGRCode = T.pack . CA.setSGRCode
 
@@ -148,7 +148,7 @@ showEmNumber 8 = "８"
 showEmNumber 9 = "９"
 showEmNumber x
   | x >= 0     = showEmNumber (x `div` 10) `T.append` showEmNumber (x `mod` 10)
-  | otherwise  = "ー" `T.append` showEmNumber (-x) 
+  | otherwise  = "ー" `T.append` showEmNumber (-x)
 
 showJaNumber :: Int -> T.Text
 showJaNumber 0 = "〇"
@@ -186,7 +186,7 @@ printConsoleShogi sc = do
   where
     bo = onboard sc
     ohs = onhands sc
-    
+
     printOnHand :: ConsoleColor -> StdShogiPlayer -> IO ()
     printOnHand cc pid = do
       let xs = map (showKomaOnHand cc pid) $ assocsOnHands pid ohs
@@ -194,15 +194,15 @@ printConsoleShogi sc = do
       let xssz = zip xss $ showPlayer pid:iterate id "    "
       foldl (\x s -> x >> putOnHandLine s) (putOnHandLine $ head xssz) $
         takeWhile (\(arr, _) -> arr /= []) $ tail xssz
-    
+
     showKomaOnHand :: ConsoleColor -> StdShogiPlayer -> (ShogiKoma, Int) -> T.Text
     showKomaOnHand cc pid (k, i) = colorText cc (showKoma pid k) `T.append` "x" `T.append` SPUs.showText i
-    
+
     putOnHandLine :: ([T.Text], T.Text) -> IO ()
     putOnHandLine (xss, h) = do
       TextIO.putStrLn $ h `T.append` ": " `T.append`
         T.intercalate ", " xss
-    
+
     printOnBoard :: PlayerColorMap -> IO ()
     printOnBoard m = do
       foldl (\x s -> x >> TextIO.putStrLn s) (TextIO.putStrLn emNumLine) $
@@ -211,24 +211,24 @@ printConsoleShogi sc = do
           borderLineByData bottomBorders] [
           borderLineByData centerBorders] $
         [[showKomaLine m h `T.append` " " `T.append` showJaNumber h] | h <- [1..9]]
-    
+
     showKomaLine :: PlayerColorMap -> Int -> T.Text
     showKomaLine m h = intertransText showLengthLine showLengthLine showLengthLine $
       [showConsoleKoma m $ lookupOnBoard (10 - w) h bo | w <- [1..9] ]
-    
+
     showLengthLine = showBorder BorderLength
-    
-    emNumLine = intertransText " " "" " " $ 
+
+    emNumLine = intertransText " " "" " " $
       [ showEmNumber s | s <- take 9 $ iterate (subtract 1) 9]
-    
+
     borderLine :: T.Text -> T.Text -> T.Text -> T.Text
     borderLine f b c = intertransText f b c $
       take 9 $ iterate id $ foldl1 T.append $
       map showBorder $ take 2 $ iterate id BorderSide
-    
+
     borderLineByData :: (TblBorder, TblBorder, TblBorder) -> T.Text
     borderLineByData (f, c, b) = borderLine (showBorder f) (showBorder b) (showBorder c)
-    
+
     topBorders = (BorderLeftTop, BorderCenterTop, BorderRightTop)
     bottomBorders = (BorderLeftBottom, BorderCenterBottom, BorderRightBottom)
     centerBorders = (BorderCenterLeft, BorderCenter, BorderCenterRight)
@@ -254,7 +254,7 @@ getConsoleMove s = do
       TextIO.putStr $ s `T.append` "> "
       x <- getLine
       return $ T.pack x
-    
+
     printWarning = do
       putStrLn "不正な入力です:"
       putStrLn " - (Int, Int); (Int, Int)[; Koma]"
@@ -295,7 +295,7 @@ game isc = do
     moveSCKoma pid cact sc = do
       act <- convCR cact sc
       move pid act sc
-    
+
     convCR :: SPUs.ConsoleShogiMoveAction -> StdShogiComp -> Maybe StdShogiMoveAction
     convCR (SPUs.CSActionOnBoard (r, c) idx2 Nothing) sc = do
       sk <- lookupOnBoard r c $ onboard sc

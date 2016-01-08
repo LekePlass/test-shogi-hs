@@ -7,9 +7,9 @@ module LibLSSP.Senders.GameStart
   , gameStartCommand
   ) where
 
-import qualified Data.Text as T
+import qualified Data.Text            as T
 
-import qualified LibLSSP.Comps.Base as Base
+import qualified LibLSSP.Comps.Base   as Base
 import           LibLSSP.Senders.Base
 
 isReadyCommand :: T.Text -> T.Text

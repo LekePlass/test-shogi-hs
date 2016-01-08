@@ -7,7 +7,7 @@ module LibLSSP.Comps.RuleConsensus
   , RuleConsensusInfo (..)
   ) where
 
-import qualified Data.Text as T
+import qualified Data.Text          as T
 
 import qualified LibLSSP.Comps.Base as Base
 
@@ -22,7 +22,7 @@ data RuleMode
   deriving ( Eq, Show, Ord )
 
 data RuleDeclarationInfo = RuleDeclarationInfo
-  { name :: T.Text
+  { name    :: T.Text
   , version :: Base.Version
   }
   deriving ( Eq, Show, Ord )

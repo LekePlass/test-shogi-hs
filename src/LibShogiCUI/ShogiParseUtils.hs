@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module LibShogiCUI.ShogiParseUtils 
+module LibShogiCUI.ShogiParseUtils
   ( showText
   , ConsoleShogiMoveAction (..)
   , parseMoveAction
@@ -9,12 +9,12 @@ module LibShogiCUI.ShogiParseUtils
   , point
   ) where
 
-import qualified Data.Attoparsec.Text as AParsec
-import qualified Data.List as List
-import qualified Data.Text as T
 import           Control.Applicative
+import qualified Data.Attoparsec.Text    as AParsec
+import qualified Data.List               as List
+import qualified Data.Text               as T
 
-import LibShogi.Data.ShogiKoma
+import           LibShogi.Data.ShogiKoma
 
 showText :: Show a => a -> T.Text
 showText = T.pack . show
@@ -25,21 +25,20 @@ data ConsoleShogiMoveAction
   deriving ( Eq, Ord, Show )
 
 parseMoveAction :: T.Text -> Maybe ConsoleShogiMoveAction
-parseMoveAction s = case AParsec.parseOnly parserMoveAction $ T.toUpper s of
-  Right x -> Just x
-  _       -> Nothing
+parseMoveAction s = either (const Nothing) id
+  $ AParsec.parseOnly parserMoveAction $ T.toUpper s
 
 parserMoveAction :: AParsec.Parser ConsoleShogiMoveAction
 parserMoveAction = csactionOnBoard <|> csactionOnHand
-  where  
+  where
     lexeme p = p <* AParsec.skipSpace
     lexemeSemicol = lexeme $ AParsec.char ';'
-    
+
     csactionOnBoard = CSActionOnBoard
       <$> (AParsec.skipSpace *> lexeme point <* lexemeSemicol)
       <*> lexeme point
       <*> ((lexemeSemicol *> (Just <$> lexeme koma)) <|> return Nothing)
-    
+
     csactionOnHand = CSActionOnHand
       <$> (AParsec.skipSpace *> lexeme point <* lexemeSemicol)
       <*> lexeme koma
@@ -64,7 +63,7 @@ koma = List.foldl1 (<|>) convKomaParsers
       , (["+B", "UM", "RYUMA", "馬", "龍馬"], KomaRyuma)
       , (["K", "OU", "OSHO", "王", "王将"], KomaOsho)
       ]
-    
+
     convKomaParsers =
       [ List.foldl1 (<|>) [ AParsec.string kStr | kStr <- kStrs] *> return k
       | (kStrs, k) <- convKomaList
@@ -75,7 +74,7 @@ point = (AParsec.char '(' *> mtuple <* AParsec.char ')') <|> mtuple
   where
     int :: AParsec.Parser Int
     int = AParsec.signed AParsec.decimal
-    
+
     mtuple = do
       let p = AParsec.skipSpace *> int <* AParsec.skipSpace
       x <- p <* AParsec.char ','

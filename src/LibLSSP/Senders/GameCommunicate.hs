@@ -10,9 +10,9 @@ module LibLSSP.Senders.GameCommunicate
   , gameStatusCommand
   ) where
 
-import qualified Data.Text as T
+import qualified Data.Text                     as T
 
-import qualified LibLSSP.Comps.Base as Base
+import qualified LibLSSP.Comps.Base            as Base
 import           LibLSSP.Comps.GameCommunicate
 import           LibLSSP.Senders.Base
 

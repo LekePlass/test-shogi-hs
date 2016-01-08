@@ -9,7 +9,7 @@ module LibLSSP.Senders.Base
   , intertrans
   ) where
 
-import qualified Data.Text as T
+import qualified Data.Text          as T
 
 import qualified LibLSSP.Comps.Base as Base
 

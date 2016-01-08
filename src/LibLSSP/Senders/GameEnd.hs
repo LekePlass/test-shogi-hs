@@ -4,7 +4,7 @@ module LibLSSP.Senders.GameEnd
   ( gameEndCommand
   ) where
 
-import qualified Data.Text as T
+import qualified Data.Text             as T
 
 import           LibLSSP.Comps.GameEnd
 import           LibLSSP.Senders.Base

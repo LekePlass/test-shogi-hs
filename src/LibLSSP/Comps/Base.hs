@@ -24,7 +24,7 @@ convertVersion3 (Version3  x y z)   = (x, y, z)
 convertVersion3 (Version3a x y z _) = (x, y, z)
 
 data DataFormatInfo = DataFormatInfo
-  { name :: T.Text
+  { name    :: T.Text
   , version :: Version
   }
   deriving ( Eq, Show, Ord )
@@ -32,7 +32,7 @@ data DataFormatInfo = DataFormatInfo
 data Time = Seconds Int
 
 data DetailInfo = DetailInfo
-  { detailType :: T.Text
-  , message :: Maybe T.Text
+  { detailType    :: T.Text
+  , message       :: Maybe T.Text
   , detailMessage :: Maybe T.Text
   }

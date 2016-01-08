@@ -6,12 +6,12 @@ module LibLSSP.Parsers.Connect
   ) where
 
 import           Control.Applicative
-import qualified Data.Attoparsec.Text as AParsec
-import qualified Data.Text as T
+import qualified Data.Attoparsec.Text  as AParsec
+import qualified Data.Text             as T
 
-import qualified LibLSSP.Comps.Base as Base
+import qualified LibLSSP.Comps.Base    as Base
 import           LibLSSP.Comps.Connect
-import qualified LibLSSP.Parsers.Base as PB
+import qualified LibLSSP.Parsers.Base  as PB
 
 protocol :: AParsec.Parser ProtocolInfo
 protocol = ProtocolInfo
@@ -24,7 +24,7 @@ protocol = ProtocolInfo
       xs <- AParsec.many' asciiLDS
       let p = return $ T.pack $ x:xs
       p AParsec.<?> "protocol name"
-    
+
     asciiLD = PB.asciiLetter <|> PB.asciiDigit
     asciiLDS = asciiLD <|> PB.asciiAllowSym
 

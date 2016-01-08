@@ -9,9 +9,9 @@ module LibLSSP.Senders.RuleConsensus
   , ruleConsensusCommand
   ) where
 
-import qualified Data.Text as T
+import qualified Data.Text                   as T
 
-import qualified LibLSSP.Comps.Base as Base
+import qualified LibLSSP.Comps.Base          as Base
 import           LibLSSP.Comps.RuleConsensus
 import           LibLSSP.Senders.Base
 

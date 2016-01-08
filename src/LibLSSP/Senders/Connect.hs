@@ -5,9 +5,9 @@ module LibLSSP.Senders.Connect
   , allowDataFormatsCommand
   ) where
 
-import qualified Data.Text as T
+import qualified Data.Text             as T
 
-import qualified LibLSSP.Comps.Base as Base
+import qualified LibLSSP.Comps.Base    as Base
 import           LibLSSP.Comps.Connect
 import           LibLSSP.Senders.Base
 

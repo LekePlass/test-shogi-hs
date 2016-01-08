@@ -22,12 +22,12 @@ module LibLSSP.Parsers.Base
   ) where
 
 import           Control.Applicative
-import qualified Data.Attoparsec.Text as AParsec
-import qualified Data.Text as T
-import qualified Data.CharSet as CS
+import qualified Data.Attoparsec.Text          as AParsec
+import qualified Data.CharSet                  as CS
 import qualified Data.CharSet.Unicode.Category as UCS
+import qualified Data.Text                     as T
 
-import qualified LibLSSP.Comps.Base as Base
+import qualified LibLSSP.Comps.Base            as Base
 
 lexeme :: AParsec.Parser a -> AParsec.Parser a
 lexeme p = p <* AParsec.skipSpace
@@ -36,14 +36,14 @@ version :: AParsec.Parser Base.Version
 version = maybeV *> (version3a <|> version3) AParsec.<?> "version"
   where
     maybeV = AParsec.char 'v' <|> return 'v'
-    
+
     dotDecimal = AParsec.char '.' *> AParsec.decimal
-    
+
     version3  = Base.Version3
       <$> AParsec.decimal
       <*> (dotDecimal <|> return 0)
       <*> (dotDecimal <* AParsec.many' dotDecimal <|> return 0)
-    
+
     version3a = Base.Version3a
       <$> AParsec.decimal
       <*> (dotDecimal <|> return 0)
@@ -61,7 +61,7 @@ dataFormat = Base.DataFormatInfo
       xs <- AParsec.many' asciiLDS
       let p = return $ T.pack $ x:xs
       p AParsec.<?> "data format name"
-    
+
     asciiLD = asciiLetter <|> asciiDigit
     asciiLDS = asciiLD <|> asciiAllowSym
 
