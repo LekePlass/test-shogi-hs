@@ -25,7 +25,7 @@ data ConsoleShogiMoveAction
   deriving ( Eq, Ord, Show )
 
 parseMoveAction :: T.Text -> Maybe ConsoleShogiMoveAction
-parseMoveAction s = either (const Nothing) id
+parseMoveAction s = either (const Nothing) Just
   $ AParsec.parseOnly parserMoveAction $ T.toUpper s
 
 parserMoveAction :: AParsec.Parser ConsoleShogiMoveAction

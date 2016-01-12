@@ -40,6 +40,7 @@ library
                      , LibLSSP.Senders.GameEnd
                      , LibLSSP.DataFormats.Base
                      , LibLSSP.DataFormats.Json
+                     , LibLSSP.Streams.Types
   build-depends:       base >= 4.7 && < 5
                      , lens
                      , bytestring
@@ -54,6 +55,10 @@ library
                      , mtl
                      , conduit
                      , transformers
+                     , free
+                     , void
+                     , stm
+                     , exceptions
   default-language:    Haskell2010
   -- TODO: write on files
   ghc-options:         -Wall -fno-warn-type-defaults -fno-warn-unused-binds -fno-warn-unused-do-bind -fno-warn-orphans

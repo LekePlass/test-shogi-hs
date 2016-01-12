@@ -105,6 +105,7 @@ asciiAllowSym :: AParsec.Parser Char
 asciiAllowSym = AParsec.satisfy isAsciiAllowSym AParsec.<?> "ascii allow symbol"
   where
     isAsciiAllowSym :: Char -> Bool
+    isAsciiAllowSym '-'  = True
     isAsciiAllowSym ':'  = True
     isAsciiAllowSym ';'  = True
     isAsciiAllowSym '.'  = True
