@@ -1,6 +1,7 @@
-module LibShogiCUI.ShogiParseUtils 
-  ( noText
-  , showText
+{-# LANGUAGE OverloadedStrings #-}
+
+module LibShogiCUI.ShogiParseUtils
+  ( showText
   , ConsoleShogiMoveAction (..)
   , parseMoveAction
   , parserMoveAction
@@ -8,46 +9,44 @@ module LibShogiCUI.ShogiParseUtils
   , point
   ) where
 
-import qualified Data.Attoparsec.Text as AParsec
-import qualified Data.List as List
-import           Data.Text (pack, Text, toUpper)
 import           Control.Applicative
+import qualified Data.Attoparsec.Text    as AParsec
+import qualified Data.List               as List
+import qualified Data.Text               as T
 
-import LibShogi.Data.ShogiKoma
+import           LibShogi.Data.ShogiKoma
 
-noText :: Text
-noText = pack ""
-
-showText :: Show a => a -> Text
-showText = pack . show
+showText :: Show a => a -> T.Text
+showText = T.pack . show
 
 data ConsoleShogiMoveAction
   = CSActionOnBoard (Int, Int) (Int, Int) (Maybe ShogiKoma)
   | CSActionOnHand  (Int, Int) ShogiKoma
   deriving ( Eq, Ord, Show )
 
-parseMoveAction :: Text -> Maybe ConsoleShogiMoveAction
-parseMoveAction s = case AParsec.parseOnly parserMoveAction $ toUpper s of
-  Right x -> Just x
-  _       -> Nothing
+parseMoveAction :: T.Text -> Maybe ConsoleShogiMoveAction
+parseMoveAction s = either (const Nothing) Just
+  $ AParsec.parseOnly parserMoveAction $ T.toUpper s
 
 parserMoveAction :: AParsec.Parser ConsoleShogiMoveAction
-parserMoveAction = 
-  (CSActionOnBoard
-  <$> (AParsec.skipSpace *> lexeme point <* lexemeSemicol)
-  <*> lexeme point
-  <*> ((lexemeSemicol *> (Just <$> lexeme koma)) <|> return Nothing)
-  ) <|> (CSActionOnHand
-  <$> (AParsec.skipSpace *> lexeme point <* lexemeSemicol)
-  <*> lexeme koma
-  )
-  where  
+parserMoveAction = csactionOnBoard <|> csactionOnHand
+  where
     lexeme p = p <* AParsec.skipSpace
     lexemeSemicol = lexeme $ AParsec.char ';'
+
+    csactionOnBoard = CSActionOnBoard
+      <$> (AParsec.skipSpace *> lexeme point <* lexemeSemicol)
+      <*> lexeme point
+      <*> ((lexemeSemicol *> (Just <$> lexeme koma)) <|> return Nothing)
+
+    csactionOnHand = CSActionOnHand
+      <$> (AParsec.skipSpace *> lexeme point <* lexemeSemicol)
+      <*> lexeme koma
 
 koma :: AParsec.Parser ShogiKoma
 koma = List.foldl1 (<|>) convKomaParsers
   where
+    convKomaList :: [([T.Text], ShogiKoma)]
     convKomaList =
       [ (["P", "FU", "FUHYO", "歩", "歩兵"], KomaFuhyo)
       , (["+P", "TO", "TOKIN", "と", "と金"], KomaTokin)
@@ -64,9 +63,9 @@ koma = List.foldl1 (<|>) convKomaParsers
       , (["+B", "UM", "RYUMA", "馬", "龍馬"], KomaRyuma)
       , (["K", "OU", "OSHO", "王", "王将"], KomaOsho)
       ]
-    
+
     convKomaParsers =
-      [ List.foldl1 (<|>) [ AParsec.string $ pack kStr | kStr <- kStrs] *> return k
+      [ List.foldl1 (<|>) [ AParsec.string kStr | kStr <- kStrs] *> return k
       | (kStrs, k) <- convKomaList
       ]
 
@@ -75,10 +74,9 @@ point = (AParsec.char '(' *> mtuple <* AParsec.char ')') <|> mtuple
   where
     int :: AParsec.Parser Int
     int = AParsec.signed AParsec.decimal
-    
+
     mtuple = do
       let p = AParsec.skipSpace *> int <* AParsec.skipSpace
       x <- p <* AParsec.char ','
       let f y = (x, y)
       f <$> p
-    

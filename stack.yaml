@@ -4,6 +4,4 @@ packages:
 - '.'
 extra-deps:
 - basic-lens-0.0.0
-- hscurses-1.4.2.0
-- record-0.4.0.2
-resolver: lts-3.16
+resolver: lts-4.0

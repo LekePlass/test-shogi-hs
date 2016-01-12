@@ -1,4 +1,4 @@
-module LibShogi.Data.ShogiBoard 
+module LibShogi.Data.ShogiBoard
   ( ShogiBoardKoma
   , ShogiBoard
   , shogiBoard
@@ -12,11 +12,12 @@ module LibShogi.Data.ShogiBoard
   , ShogiComp (..)
   ) where
 
-import qualified Data.Map as Map
+import qualified Data.Map                as Map
+import           Data.Maybe              (fromMaybe)
 
-import LibShogi.Data.Koma
-import LibShogi.Data.Board
-import LibShogi.Data.ShogiKoma
+import           LibShogi.Data.Board
+import           LibShogi.Data.Koma
+import           LibShogi.Data.ShogiKoma
 
 type ShogiBoardKoma a = Koma a ShogiKoma
 type ShogiBoard a = Board (Maybe (ShogiBoardKoma a))
@@ -34,14 +35,14 @@ shogiOnHands :: Ord a => ShogiOnHands a
 shogiOnHands = Map.fromList []
 
 lookupOnHands :: Ord a => a -> ShogiKoma -> ShogiOnHands a -> Int
-lookupOnHands pid sk ohs = maybe 0 id $ do
+lookupOnHands pid sk ohs = fromMaybe 0 $ do
   oh <- Map.lookup pid ohs
   return $ lookupOnHand sk oh
 
 insertOnHands :: Ord a => a -> ShogiKoma -> ShogiOnHands a -> ShogiOnHands a
 insertOnHands pid sk ohs = Map.insert pid noh ohs
   where
-    noh = maybe (Map.fromList [(sk, 1)]) id $ do
+    noh = fromMaybe (Map.fromList [(sk, 1)]) $ do
       oh <- Map.lookup pid ohs
       return $ insertOnHand sk oh
 
@@ -52,12 +53,12 @@ pickupOnHands pid sk ohs = do
   return $ Map.insert pid poh ohs
 
 assocsOnHands :: Ord a => a -> ShogiOnHands a -> [(ShogiKoma, Int)]
-assocsOnHands pid ohs = maybe [] id $ do
+assocsOnHands pid ohs = fromMaybe [] $ do
   oh <- Map.lookup pid ohs
   return $ Map.assocs oh
 
 lookupOnHand :: ShogiKoma -> ShogiOnHand -> Int
-lookupOnHand sk oh = maybe 0 id $ Map.lookup sk oh
+lookupOnHand sk oh = fromMaybe 0 $ Map.lookup sk oh
 
 insertOnHand :: ShogiKoma -> ShogiOnHand -> ShogiOnHand
 insertOnHand sk oh = Map.insert sk (lookupOnHand sk oh + 1) oh

@@ -9,3 +9,4 @@
 # for Editor
 *.swp
 *~
+.vscode/

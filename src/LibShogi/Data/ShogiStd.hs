@@ -8,12 +8,13 @@ module LibShogi.Data.ShogiStd
   , canNariKoma
   ) where
 
-import Control.Lens
+import           Control.Lens
+import           Data.Maybe               (fromMaybe)
 
-import LibShogi.Data.Koma
-import LibShogi.Data.Board
-import LibShogi.Data.ShogiKoma
-import LibShogi.Data.ShogiBoard
+import           LibShogi.Data.Board
+import           LibShogi.Data.Koma
+import           LibShogi.Data.ShogiBoard
+import           LibShogi.Data.ShogiKoma
 
 data StdShogiPlayer
   = SentePlayer
@@ -23,7 +24,7 @@ data StdShogiPlayer
 type StdShogiComp = ShogiComp StdShogiPlayer
 
 stdShogiIni :: [((Int, Int), Maybe (ShogiBoardKoma StdShogiPlayer))]
-stdShogiIni = 
+stdShogiIni =
   [ ((1, 1), komaSente KomaKyosha  )
   , ((2, 1), komaSente KomaKeima   )
   , ((3, 1), komaSente KomaGinsho  )
@@ -84,26 +85,26 @@ moveKomaByRange :: StdShogiPlayer -> (Int, Int) -> StdShogiComp -> [(Int, Int)] 
 moveKomaByRange pid (r, c) sc rs = filterCanMove pid sc idxs
   where
     idxs = map biasIx rs
-    
+
     reverseIdxByPlayer :: StdShogiPlayer -> (Int, Int) -> (Int, Int)
     reverseIdxByPlayer SentePlayer idx      = idx
     reverseIdxByPlayer GotePlayer  (ir, ic) = (-ir, -ic)
-    
+
     biasIx :: (Int, Int) -> (Int, Int)
     biasIx idx = reverseIdxByPlayer pid idx & _1 %~ (+ r) & _2 %~ (+ c)
 
 moveKomaByDir :: StdShogiPlayer -> (Int, Int) -> StdShogiComp -> (Int, Int) -> [(Int, Int)]
-moveKomaByDir pid idx sc dir = idxsT ^. _1 ++ filterCanMove pid sc [head $ idxsT ^. _2] 
+moveKomaByDir pid idx sc dir = idxsT ^. _1 ++ filterCanMove pid sc [head $ idxsT ^. _2]
   where
     b = onboard sc
-    
+
     idxsT = span canMove' $ tail $ iterate (addTuple (reverseIdxByPlayer pid dir)) idx
     addTuple idx1 (r, c) = idx1 & _1 %~ (+ r) & _2 %~ (+ c)
-    
+
     reverseIdxByPlayer :: StdShogiPlayer -> (Int, Int) -> (Int, Int)
     reverseIdxByPlayer SentePlayer sidx     = sidx
     reverseIdxByPlayer GotePlayer  (ir, ic) = (-ir, -ic)
-    
+
     canMove' :: (Int, Int) -> Bool
     canMove' sidx = if isStdRange sidx
       then b ! sidx == Nothing
@@ -177,7 +178,7 @@ stdMoveKoma' pid KomaRyuo    idx sc = idxsR ++ idxsD
   where
     idxsR = moveKomaByRange pid idx sc rs
     rs = [(-1, -1), (-1, 1), (1, 1), (1, -1)]
-    
+
     idxsD = concat $ map canDirMove [(-1, 0), (0, -1), (1, 0), (0, 1)]
     canDirMove = moveKomaByDir pid idx sc
 
@@ -185,12 +186,12 @@ stdMoveKoma' pid KomaRyuma   idx sc = idxsR ++ idxsD
   where
     idxsR = moveKomaByRange pid idx sc rs
     rs = [(-1, 0), (0, -1), (1, 0), (0, 1)]
-    
+
     idxsD = concat $ map canDirMove [(-1, -1), (1, -1), (1, 1), (-1, 1)]
     canDirMove = moveKomaByDir pid idx sc
 
 stdMoveKoma :: (Int, Int) -> StdShogiComp -> [(Int, Int)]
-stdMoveKoma idx sc = maybe [] id $ do
+stdMoveKoma idx sc = fromMaybe [] $ do
   bsk <- onboard sc ! idx
   return $ stdMoveKoma' (player bsk) (komaId bsk) idx sc
 
@@ -202,7 +203,7 @@ stdShogiComp = ShogiComp
   where
     ob' = shogiBoard 9 9
     ob = ob' // stdShogiIni
-    
+
     ohs = shogiOnHands
 
 data StdShogiMoveAction
@@ -214,20 +215,20 @@ move :: StdShogiPlayer -> StdShogiMoveAction -> StdShogiComp -> Maybe StdShogiCo
 move pid (ShogiMoveOnBoard idx1 idx2 sk) sc = resc
   where
     resc = if canMoveOnBoard pid idx1 idx2 sk sc && idx2 `elem` skMoves
-      then Just $ ShogiComp 
+      then Just $ ShogiComp
         { onboard = b //
           [ (idx1, Nothing)
           , (idx2, Just $ koma pid sk)
           ]
-        , onhands = maybe ohs id $ do
+        , onhands = fromMaybe ohs $ do
           psk <- b ! idx2
           return $ insertOnHands pid (komaId psk) ohs
         }
       else Nothing
-    
+
     b = onboard sc
     ohs = onhands sc
-    
+
     skMoves = stdMoveKoma idx1 sc
 
 move pid (ShogiMoveOnHand idx sk) sc = resc
@@ -240,28 +241,28 @@ move pid (ShogiMoveOnHand idx sk) sc = resc
           , onhands = pohs
           }
       else Nothing
-    
+
     b = onboard sc
     ohs = onhands sc
 
 canMoveOnBoard :: StdShogiPlayer -> (Int, Int) -> (Int, Int) -> ShogiKoma -> StdShogiComp -> Bool
-canMoveOnBoard pid idx1 idx2 sk sc = (maybe False id $ do
+canMoveOnBoard pid idx1 idx2 sk sc = (fromMaybe False $ do
   bsk <- b ! idx1
   let chKoma = canChKoma idx2 (komaId bsk) sk
   let ownKoma1 = pid == player bsk
   return $ chKoma && ownKoma1) &&
-  (maybe True id $ do
+  (maybe True not $ do
   ownKoma2 <- isOwnKoma pid idx2 sc
-  return $ not ownKoma2)
+  return ownKoma2)
   where
     b = onboard sc
-    
+
     canChKoma :: (Int, Int) -> ShogiKoma -> ShogiKoma -> Bool
     canChKoma idx ksk nsk = ksk == nsk ||
-      canChRange pid idx && (maybe False id $ do
+      canChRange pid idx && (fromMaybe False $ do
       bsk <- base nsk
       return $ ksk == bsk)
-    
+
     canChRange :: StdShogiPlayer -> (Int, Int) -> Bool
     canChRange SentePlayer (_, x) = x >= 7
     canChRange GotePlayer  (_, x) = x <= 3
@@ -272,7 +273,7 @@ canMoveOnHands pid idx sk sc = ohc > 0 &&
   where
     b = onboard sc
     ohs = onhands sc
-    
+
     ohc = lookupOnHands pid sk ohs
 
 isOwnKoma :: StdShogiPlayer -> (Int, Int) -> StdShogiComp -> Maybe Bool

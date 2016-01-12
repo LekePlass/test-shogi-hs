@@ -3,7 +3,7 @@ version:             0.1.0.0
 synopsis:            Initial project template from stack
 description:         Please see README.md
 homepage:            http://github.com/githubuser/test-shogi-hs#readme
-license:             BSD3
+license:             MIT
 license-file:        LICENSE
 author:              Mizunashi Mana
 maintainer:          mizunashi_mana@mma.club.uec.ac.jp
@@ -22,26 +22,46 @@ library
                      , LibShogi.Data.ShogiStd
                      , LibShogiCUI.ShogiCUI
                      , LibShogiCUI.ShogiParseUtils
+                     , LibLSSP.Comps.Base
+                     , LibLSSP.Comps.Connect
+                     , LibLSSP.Comps.RuleConsensus
+                     , LibLSSP.Comps.GameCommunicate
+                     , LibLSSP.Comps.GameEnd
+                     , LibLSSP.Parsers.Base
+                     , LibLSSP.Parsers.Connect
+                     , LibLSSP.Parsers.RuleConsensus
+                     , LibLSSP.Parsers.GameCommunicate
+                     , LibLSSP.Parsers.GameEnd
+                     , LibLSSP.Senders.Base
+                     , LibLSSP.Senders.Connect
+                     , LibLSSP.Senders.RuleConsensus
+                     , LibLSSP.Senders.GameStart
+                     , LibLSSP.Senders.GameCommunicate
+                     , LibLSSP.Senders.GameEnd
+                     , LibLSSP.DataFormats.Base
+                     , LibLSSP.DataFormats.Json
+                     , LibLSSP.Streams.Types
   build-depends:       base >= 4.7 && < 5
                      , lens
-                     , record
-                     , text
                      , bytestring
-                     , async
-                     , conduit
-                     , conduit-extra
-                     , either
-                     , exceptions
-                     , mtl
-                     , void
+                     , text
+                     , text-show
                      , array
                      , ansi-terminal
                      , containers
                      , attoparsec
+                     , aeson
+                     , charset
+                     , mtl
+                     , conduit
                      , transformers
-                     , transformers-base
+                     , free
+                     , void
+                     , stm
+                     , exceptions
   default-language:    Haskell2010
-  ghc-options:         -Wall -fno-warn-type-defaults -fno-warn-unused-binds -fno-warn-unused-do-bind
+  -- TODO: write on files
+  ghc-options:         -Wall -fno-warn-type-defaults -fno-warn-unused-binds -fno-warn-unused-do-bind -fno-warn-orphans
 
 executable test-shogi-hs-exe
   hs-source-dirs:      app
@@ -50,6 +70,8 @@ executable test-shogi-hs-exe
   build-depends:       base
                      , test-shogi-hs
                      , attoparsec
+                     , conduit
+                     , conduit-extra
   default-language:    Haskell2010
 
 test-suite test-shogi-hs-test

@@ -1,4 +1,4 @@
-module LibShogi.Data.Board 
+module LibShogi.Data.Board
   ( Board (..)
   , board
   , index
@@ -22,11 +22,11 @@ instance Show a => Show (Board a) where
   show (Board { width = w, height = h, items = arr }) = showStr
     where
       showItem x y = show $ arr Arr.! (x, y)
-      
+
       showLine' 1 y = showItem 1 y
       showLine' x y = showLine' (x - 1) y ++ ", " ++ showItem x y
       showLine x = "[" ++ showLine' w x ++ "]"
-      
+
       showStr' 1 = showLine 1
       showStr' x = showStr' (x - 1) ++ ", " ++ showLine x
       showStr = "[" ++ showStr' h ++ "]"
