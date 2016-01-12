@@ -1,4 +1,4 @@
-module LibShogi.Data.ShogiBoard
+module Data.Shogi.Board
   ( ShogiBoardKoma
   , ShogiBoard
   , shogiBoard
@@ -12,12 +12,12 @@ module LibShogi.Data.ShogiBoard
   , ShogiComp (..)
   ) where
 
-import qualified Data.Map                as Map
-import           Data.Maybe              (fromMaybe)
+import qualified Data.Map                  as Map
+import           Data.Maybe                (fromMaybe)
 
-import           LibShogi.Data.Board
-import           LibShogi.Data.Koma
-import           LibShogi.Data.ShogiKoma
+import           Data.Shogi.Internal.Board
+import           Data.Shogi.Internal.Koma
+import           Data.Shogi.Koma
 
 type ShogiBoardKoma a = Koma a ShogiKoma
 type ShogiBoard a = Board (Maybe (ShogiBoardKoma a))

@@ -1,0 +1,67 @@
+name:                lib-shogi
+version:             0.1.0.0
+synopsis:            haskell shogi library
+description:         Please see README.md
+homepage:            http://github.com/githubuser/test-shogi-hs#readme
+license:             MIT
+license-file:        LICENSE
+author:              Mizunashi Mana
+maintainer:          mizunashi_mana@mma.club.uec.ac.jp
+copyright:           2015 Mizunashi Mana
+category:            Shogi
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     Data.Shogi.Internal.Koma
+                     , Data.Shogi.Internal.Board
+                     , Data.Shogi.Koma
+                     , Data.Shogi.Board
+                     , Data.Shogi.StdTypes
+                     , UI.Shogi.ShogiCUI
+                     , UI.Shogi.ShogiParseUtils
+  build-depends:       base >= 4.7 && < 5
+                     , lens
+                     , bytestring
+                     , text
+                     , text-show
+                     , array
+                     , ansi-terminal
+                     , containers
+                     , attoparsec
+                     , mtl
+                     , conduit
+                     , transformers
+                     , void
+                     , stm
+                     , exceptions
+  default-language:    Haskell2010
+  -- TODO: write on files
+  ghc-options:         -Wall
+
+executable lib-shogi-exe
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , lib-shogi
+                     , attoparsec
+                     , conduit
+                     , conduit-extra
+  default-language:    Haskell2010
+
+test-suite lib-shogi-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , lib-shogi
+                     , hspec
+                     , hlint
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/githubuser/test-shogi-hs

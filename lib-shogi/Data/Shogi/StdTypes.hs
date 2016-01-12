@@ -1,4 +1,4 @@
-module LibShogi.Data.ShogiStd
+module Data.Shogi.StdTypes
   ( StdShogiPlayer (..)
   , StdShogiComp
   , stdShogiComp
@@ -9,12 +9,12 @@ module LibShogi.Data.ShogiStd
   ) where
 
 import           Control.Lens
-import           Data.Maybe               (fromMaybe)
+import           Data.Maybe                (fromMaybe)
 
-import           LibShogi.Data.Board
-import           LibShogi.Data.Koma
-import           LibShogi.Data.ShogiBoard
-import           LibShogi.Data.ShogiKoma
+import           Data.Shogi.Board
+import           Data.Shogi.Internal.Board
+import           Data.Shogi.Internal.Koma
+import           Data.Shogi.Koma
 
 data StdShogiPlayer
   = SentePlayer
@@ -287,5 +287,5 @@ canNariKoma :: StdShogiPlayer -> (Int, Int) -> (Int, Int) -> StdShogiComp -> May
 canNariKoma pid idx1 idx2 sc = do
   sk <- onboard sc ! idx1
   nsk <- nari $ komaId sk
-  move pid (ShogiMoveOnBoard idx1 idx2 nsk) sc
+  _ <- move pid (ShogiMoveOnBoard idx1 idx2 nsk) sc
   return nsk

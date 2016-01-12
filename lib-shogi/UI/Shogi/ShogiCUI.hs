@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module LibShogiCUI.ShogiCUI
+module UI.Shogi.ShogiCUI
   ( ConsoleColor (..)
   , color
   , colorText
@@ -17,17 +17,17 @@ module LibShogiCUI.ShogiCUI
 
 import           Control.Lens
 import           Data.List
-import qualified Data.Map                    as Map
-import qualified Data.Text                   as T
-import qualified Data.Text.IO                as TextIO
-import qualified System.Console.ANSI         as CA
+import qualified Data.Map                 as Map
+import qualified Data.Text                as T
+import qualified Data.Text.IO             as TextIO
+import qualified System.Console.ANSI      as CA
 
-import           LibShogi.Data.Koma
-import           LibShogi.Data.ShogiBoard
-import           LibShogi.Data.ShogiKoma
-import           LibShogi.Data.ShogiStd
+import           Data.Shogi.Board
+import           Data.Shogi.Internal.Koma
+import           Data.Shogi.Koma
+import           Data.Shogi.StdTypes
 
-import qualified LibShogiCUI.ShogiParseUtils as SPUs
+import qualified UI.Shogi.ShogiParseUtils as SPUs
 
 type PlayerColorMap = Map.Map StdShogiPlayer (ConsoleColor, ConsoleColor)
 
@@ -248,7 +248,7 @@ getConsoleMove s = do
       loop _ = do
         putStrLn "プログラムを終了します"
         return Nothing
-  loop 0
+  loop (0 :: Int)
   where
     askAction = do
       TextIO.putStr $ s `T.append` "> "
@@ -289,7 +289,7 @@ game isc = do
           _        -> do
             putStrLn $ show ms
             return ()
-  loop 0 isc
+  loop (0 :: Int) isc
   where
     moveSCKoma :: StdShogiPlayer -> SPUs.ConsoleShogiMoveAction -> StdShogiComp -> Maybe StdShogiComp
     moveSCKoma pid cact sc = do
