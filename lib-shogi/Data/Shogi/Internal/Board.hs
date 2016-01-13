@@ -1,4 +1,4 @@
-module LibShogi.Data.Board
+module Data.Shogi.Internal.Board
   ( Board (..)
   , board
   , index

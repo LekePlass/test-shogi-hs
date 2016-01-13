@@ -100,7 +100,7 @@ sourceIOM = do
   C.yield [1]
 
 sinkIOM :: IOM_Si Int
-sinkIOM = CL.mapM_ $ lift $ put 1
+sinkIOM = lift $ put 1
 
 coIOM :: IOM_Co Int
 coIOM = do

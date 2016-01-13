@@ -1,4 +1,4 @@
-module LibShogi.Data.ShogiKoma
+module Data.Shogi.Koma
   ( ShogiKoma (..)
   , nari
   , base

@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module LibShogiCUI.ShogiParseUtils
+module UI.Shogi.ShogiParseUtils
   ( showText
   , ConsoleShogiMoveAction (..)
   , parseMoveAction
@@ -10,11 +10,11 @@ module LibShogiCUI.ShogiParseUtils
   ) where
 
 import           Control.Applicative
-import qualified Data.Attoparsec.Text    as AParsec
-import qualified Data.List               as List
-import qualified Data.Text               as T
+import qualified Data.Attoparsec.Text as AParsec
+import qualified Data.List            as List
+import qualified Data.Text            as T
 
-import           LibShogi.Data.ShogiKoma
+import           Data.Shogi.Koma
 
 showText :: Show a => a -> T.Text
 showText = T.pack . show

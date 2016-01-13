@@ -1,9 +1,9 @@
-module LibShogi.Data.Koma
+module Data.Shogi.Internal.Koma
   ( Koma (..)
   , koma
   ) where
 
-data Koma a k = Koma 
+data Koma a k = Koma
   { player :: a
   , komaId :: k
   }
