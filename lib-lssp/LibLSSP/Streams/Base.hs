@@ -5,11 +5,10 @@
 -- Output Text
 
 {-
+liftTextIO :: (MonadTextIO m) => TextIO a -> m a
 type TextIOM = Free TextIO
-type ContextTextIOM = StateT Context TextIOM
-type ContextSource = Source ContextTextIOM StartInfo
-type ContextConduit a b = Conduit a ContextTextIOM b
-type ContextSink a b = Sink a ContextTextIOM b
+type EHContextM = StateT EventHandlers TextIOM
+type EHM = ErrorT ProtocolError EHContextM
 -}
 
 {-
@@ -64,4 +63,20 @@ type ContextSink a b = Sink a ContextTextIOM b
 |    +----------------------------+    |
 |                                      |
 +--------------------------------------+
+-}
+
+{-
+(MonadIO m) =>
+on start     :: ()      -> m Rule
+on consensus :: Info    -> m Answer
+on ready     :: ()      -> m ()
+on go        :: Context -> m Action
+on stop      :: ()      -> m ()
+on status    :: Status  -> m ()
+on end       :: Result  -> m ()
+-}
+
+{-
+type Receiver = Conduit a m (a, b)
+type Sender   = Conduit a m a
 -}
