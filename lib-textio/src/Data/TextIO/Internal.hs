@@ -13,9 +13,9 @@ import           Control.Monad.Operational
 import qualified Data.Text                 as T
 
 data TextIOOpe a where
-  PutText :: T.Text -> TextIOOpe ()
+  PutText :: !T.Text -> TextIOOpe ()
   GetCh   :: TextIOOpe Char
-  Throw   :: T.Text -> TextIOOpe ()
+  Throw   :: !T.Text -> TextIOOpe ()
 
 type TextIO a = Program TextIOOpe a
 

@@ -1,7 +1,9 @@
+{-# LANGUAGE BangPatterns      #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Lib
   ( someFunc
+  , nextShogiComp
   ) where
 
 import           Control.Monad
@@ -97,8 +99,8 @@ gameConC scomp = GameContext board colors Map.empty
       Just (Koma.Koma pid kid) -> (Just $ convKid kid, convPid pid)
       Nothing                  -> (Nothing, False)
 
-    convPid GotePlayer  = True
-    convPid SentePlayer = False
+    convPid SentePlayer = True
+    convPid GotePlayer  = False
 
     convKid = id
 
@@ -112,8 +114,8 @@ gameStatC scomp = GameStatusResult board colors Map.empty
       Just (Koma.Koma pid kid) -> (Just $ convKid kid, convPid pid)
       Nothing                  -> (Nothing, False)
 
-    convPid GotePlayer  = True
-    convPid SentePlayer = False
+    convPid SentePlayer = True
+    convPid GotePlayer  = False
 
     convKid = id
 
@@ -146,14 +148,14 @@ phase4 :: TextIO ()
 phase4 = putText $ gameStartCommand "good luck"
 
 getActionM :: T.Text -> Maybe GameActionMoveInfo
-getActionM tx = parseMaybe (commandPrefix *> gameActionMove) tx
+getActionM = parseMaybe $ commandPrefix *> gameActionMove
 
 convMoveInfo :: GameActionMoveInfo -> StdShogiMoveAction
 convMoveInfo (MoveActionOnBoard idx1 idx2 k) = ShogiMoveOnBoard idx1 idx2 k
 convMoveInfo (MoveActionOnHand  idx1      k) = ShogiMoveOnHand idx1 k
 
 phase5 :: StdShogiComp -> Int -> TextIO ()
-phase5 gc i = do
+phase5 !gc !i = do
   putText $ jsonCommand "Game-Context" $ gameConC gc
   putText $ goCommand "thinking"
   pstr <- getTextLine
@@ -165,8 +167,8 @@ phase5 gc i = do
       Just ngc -> do
         putText $ gameStatusCommand GameContinue
         putText $ jsonCommand "Game-Status-Result" $ gameStatC ngc
-        let (i, nsc) = nextShogiComp i ngc
-        phase5 nsc (i + 1)
+        let (ni, nsc) = nextShogiComp i ngc
+        phase5 nsc ni
       Nothing  -> do
         putText $ gameStatusCommand GameEnd
         putText $ jsonCommand "Game-Status-Result" $ gameStatC gc
@@ -174,23 +176,20 @@ phase5 gc i = do
     Nothing  -> void $ throwParseError pstr
 
 nextShogiComp :: Int -> StdShogiComp -> (Int, StdShogiComp)
-nextShogiComp i sc = (ni, nextSC (acts !! ni) sc)
+nextShogiComp i sc = fromMaybe (nextShogiComp ni sc) $ do
+  let r = i `mod` 9 + 1
+  let c = i `div` 9 + 1
+  (Koma.Koma pid k) <- lookupOnBoard r c board
+  if pid == GotePlayer
+    then do
+      let nidx = head $ stdMoveKoma (r, c) sc
+      nsc <- move GotePlayer (ShogiMoveOnBoard (r, c) nidx k) sc
+      return (ni, nsc)
+    else return $ nextShogiComp ((i + 11) `mod` 81) sc
   where
-    ni = i `mod` length acts
+    board = onboard sc
 
-    nextSC (idx1, idx2) sc = fromMaybe sc $ do
-      k <- lookupOnBoard' idx1
-      move GotePlayer (ShogiMoveOnBoard idx1 idx2 k) sc
-
-    lookupOnBoard' :: (Int,Int) -> Maybe ShogiKoma
-    lookupOnBoard' (i,j) = do
-      (Koma.Koma pid kid) <- lookupOnBoard i j $ onboard sc
-      return kid
-
-    acts = concat [ ownkoma [] actions (i, j) | i <- [1..9], j <- [1..9] ]
-
-    ownkoma d f idx = maybe d (\b -> if b then f idx else d) $ isOwnKoma GotePlayer idx sc
-    actions idx = map ((,) idx) $ stdMoveKoma idx sc
+    ni = i + 7 `mod` 81
 
 serverIO :: TextIO ()
 serverIO = do
