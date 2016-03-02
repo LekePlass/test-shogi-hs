@@ -7,6 +7,8 @@ module Lib
 import           Data.Aeson
 import           Data.Attoparsec.Text          as AP
 import qualified Data.Map                      as Map
+import           Data.Shogi.Board
+import           Data.Shogi.Internal.Koma      as Koma
 import           Data.Shogi.StdTypes
 import qualified Data.Text                     as T
 import           Data.TextIO
@@ -24,7 +26,6 @@ import           LibLSSP.Senders.Connect
 import           LibLSSP.Senders.GameStart
 import           LibLSSP.Senders.RuleConsensus
 import           TextShow
-import Data.Shogi.Board
 
 commandPrefix :: AP.Parser T.Text
 commandPrefix = AP.takeWhile (/= ':') <* lexeme (AP.char ':')
@@ -63,11 +64,34 @@ throwParseError :: T.Text -> TextIO ()
 throwParseError tx = throwText $ "This is illegal command: " `T.append` tx
 
 initialConC :: StdShogiComp -> InitialContext
-initialConC scomp = InitialContext True board hands
+initialConC scomp = InitialContext True board colors Map.empty
   where
-    board = map (\i -> map (\j -> lookupOnBoard i j $ onboard scomp) [1..9]) [1..9]
+    (board, colors) = unzip $ map (\i -> unzip $ map (lookupOnBoard' i) [1..9]) [1..9]
 
-    hands = onhands scomp
+    lookupOnBoard' :: Int -> Int -> (Maybe GameKoma, Bool)
+    lookupOnBoard' i j = case lookupOnBoard j i $ onboard scomp of
+      Just (Koma.Koma pid kid) -> (Just $ convKid kid, convPid pid)
+      Nothing                  -> (Nothing, False)
+
+    convPid SentePlayer = True
+    convPid GotePlayer  = False
+
+    convKid = id
+
+gameConC :: StdShogiComp -> GameContext
+gameConC scomp = GameContext board colors Map.empty
+  where
+    (board, colors) = unzip $ map (\i -> unzip $ map (lookupOnBoard' i) [1..9]) [1..9]
+
+    lookupOnBoard' :: Int -> Int -> (Maybe GameKoma, Bool)
+    lookupOnBoard' i j = case lookupOnBoard j i $ onboard scomp of
+      Just (Koma.Koma pid kid) -> (Just $ convKid kid, convPid pid)
+      Nothing                  -> (Nothing, False)
+
+    convPid SentePlayer = True
+    convPid GotePlayer  = False
+
+    convKid = id
 
 phase1 :: TextIO ()
 phase1 = do
@@ -97,18 +121,18 @@ phase3 = do
 phase4 :: TextIO ()
 phase4 = putText $ gameStartCommand "good luck"
 
-phase5 :: GameContext -> TextIO ()
+phase5 :: StdShogiComp -> TextIO ()
 phase5 gc = do
   putText $ gameStartCommand "good luck"
   putText $ gameStartCommand "good luck"
 
 serverIO :: TextIO ()
 serverIO = do
-  let context = GameContext True Nothing Nothing [] [] Map.empty
   phase1
-  phase2 $ initialConv context
+  phase2 $ initialConC stdShogiComp
   phase3
   phase4
+  phase5 stdShogiComp
 
 someFunc :: IO ()
 someFunc = runTIOTCPServer (serverSettings 4000 "*") serverIO

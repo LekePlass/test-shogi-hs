@@ -7,7 +7,8 @@ module LibLSSP.Comps.Base
   , GameKoma (..)
   ) where
 
-import qualified Data.Text as T
+import           Data.Shogi.Koma
+import qualified Data.Text       as T
 
 data Version
   = Version3 Int Int Int
@@ -38,35 +39,4 @@ data DetailInfo = DetailInfo
   , detailMessage :: Maybe T.Text
   }
 
-data GameKoma
-  = KomaFuhyo
-  | KomaKyosha
-  | KomaKeima
-  | KomaGinsho
-  | KomaKinsho
-  | KomaOsho
-  | KomaHisha
-  | KomaKakugyo
-  | KomaTokin
-  | KomaNarikyo
-  | KomaNarikei
-  | KomaNarigin
-  | KomaRyuo
-  | KomaRyuma
-  deriving ( Eq, Ord )
-
-instance Show GameKoma where
-  show KomaFuhyo   = "歩"
-  show KomaKyosha  = "香"
-  show KomaKeima   = "桂"
-  show KomaGinsho  = "銀"
-  show KomaKinsho  = "金"
-  show KomaOsho    = "王"
-  show KomaHisha   = "飛"
-  show KomaKakugyo = "角"
-  show KomaTokin   = "と"
-  show KomaNarikyo = "杏"
-  show KomaNarikei = "圭"
-  show KomaNarigin = "全"
-  show KomaRyuo    = "龍"
-  show KomaRyuma   = "馬"
+type GameKoma = ShogiKoma

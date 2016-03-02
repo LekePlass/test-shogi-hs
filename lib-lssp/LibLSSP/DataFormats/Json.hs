@@ -15,6 +15,7 @@ import qualified Data.Attoparsec.Types         as AParsecT
 import qualified Data.Char                     as Char
 import qualified Data.Map                      as Map
 import           Data.Maybe                    (catMaybes)
+import           Data.Shogi.Koma               as CB
 import qualified Data.Text                     as T
 import qualified Data.Text.Encoding            as E
 import qualified Data.Text.Lazy                as TL
@@ -204,8 +205,6 @@ instance FromJSON CRC.InitialContext where
 instance ToJSON CRC.InitialContext where
   toJSON v = object $ catMaybes
     [ "your_turn" `elemJSON`  CRC.yourTurn v
-    , "moves"     `elemMaybe` CRC.moves    v
-    , "max_moves" `elemMaybe` CRC.maxMoves v
     , "board"     `elemJSON`  CRC.board    v
     , "colors"    `elemJSON`  CRC.colors   v
     , "hands"     `elemJSON`  Map.toAscList (CRC.hands v)
@@ -224,10 +223,7 @@ instance FromJSON CGC.GameContext where
 
 instance ToJSON CGC.GameContext where
   toJSON v = object $ catMaybes
-    [ "your_turn" `elemJSON`  CGC.yourTurn v
-    , "moves"     `elemMaybe` CGC.moves    v
-    , "max_moves" `elemMaybe` CGC.maxMoves v
-    , "board"     `elemJSON`  CGC.board    v
+    [ "board"     `elemJSON`  CGC.board    v
     , "colors"    `elemJSON`  CGC.colors   v
     , "hands"     `elemJSON`  Map.toAscList (CGC.hands v)
     ]

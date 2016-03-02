@@ -19,14 +19,11 @@ module LibLSSP.Streams.Types
   , TextIOM
   ) where
 
-import           Control.Lens
-import           Control.Monad         (replicateM)
 import           Control.Monad.Catch   ()
 import           Control.Monad.Free
 import           Control.Monad.Free.TH (makeFree)
 import           Control.Monad.State
 import qualified Data.Conduit          as C
-import qualified Data.Conduit.List     as CL
 import qualified Data.Text             as T
 import qualified Data.Text.IO          as TIO
 import           Prelude               hiding (getChar, putStr, putStrLn)
