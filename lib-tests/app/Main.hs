@@ -9,10 +9,10 @@ module Main
 import           Control.Concurrent  (forkIO)
 import           Control.Monad       (forever, unless)
 import           Control.Monad.Trans (liftIO)
-import           Network.Socket      (withSocketsDo)
 import           Data.Text           (Text)
 import qualified Data.Text           as T
 import qualified Data.Text.IO        as T
+import           Network.Socket      (withSocketsDo)
 import qualified Network.WebSockets  as WS
 
 
@@ -24,10 +24,10 @@ app conn = do
     -- Fork a thread that writes WS data to stdout
     _ <- forkIO $ forever $ do
         msg <- WS.receiveData conn
-        liftIO $ T.putStrLn msg
+        liftIO $ T.putStr msg
 
     -- Read from stdin and write to WS
-    let loop = do { line <- T.getLine ; unless (T.null line) $ WS.sendTextData conn line >> loop }
+    let loop = do { line <- T.getLine ; unless (T.null line) $ WS.sendTextData conn (line `T.append` "\r\n") >> loop }
 
     loop
     WS.sendClose conn ("Bye!" :: Text)
