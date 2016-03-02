@@ -5,6 +5,7 @@ packages:
 - 'lib-shogi'
 - 'lib-textio'
 - 'shogi-server'
+- 'lib-tests'
 extra-deps:
 - basic-lens-0.0.0
 resolver: lts-5.4

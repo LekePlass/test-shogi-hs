@@ -12,8 +12,7 @@ import           Data.Shogi.Internal.Koma      as Koma
 import           Data.Shogi.StdTypes
 import qualified Data.Text                     as T
 import           Data.TextIO
-import           Data.TextIO.IO                ()
-import           Data.TextIO.Network
+import Data.TextIO.WebSocket
 import           LibLSSP.Comps.Base
 import           LibLSSP.Comps.GameCommunicate
 import           LibLSSP.Comps.RuleConsensus
@@ -26,6 +25,7 @@ import           LibLSSP.Senders.Connect
 import           LibLSSP.Senders.GameStart
 import           LibLSSP.Senders.RuleConsensus
 import           TextShow
+import LibLSSP.Senders.GameCommunicate
 
 commandPrefix :: AP.Parser T.Text
 commandPrefix = AP.takeWhile (/= ':') <* lexeme (AP.char ':')
@@ -123,8 +123,15 @@ phase4 = putText $ gameStartCommand "good luck"
 
 phase5 :: StdShogiComp -> TextIO ()
 phase5 gc = do
-  putText $ gameStartCommand "good luck"
-  putText $ gameStartCommand "good luck"
+  putText $ jsonCommand "Game-Context" $ gameConC gc
+  putText $ goCommand "thinking"
+  pstr <- getTextLine
+  tx <- getCPrefixM "Game-Action-Mode" pstr
+  pstr <- getTextLine
+  tx <- getCPrefixM "Game-Action-Move" pstr
+  putText $ gameStatusCommand GameContinue
+  putText $ jsonCommand "Game-Status-Result" ("" :: String)
+  phase5 gc
 
 serverIO :: TextIO ()
 serverIO = do
@@ -135,4 +142,5 @@ serverIO = do
   phase5 stdShogiComp
 
 someFunc :: IO ()
-someFunc = runTIOTCPServer (serverSettings 4000 "*") serverIO
+someFunc = runTIOWSServer "0.0.0.0" 8888 serverIO
+--someFunc = runTIOTCPServer (serverSettings 8888 "*") serverIO
