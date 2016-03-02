@@ -7,8 +7,8 @@ module LibLSSP.Comps.RuleConsensus
   , RuleConsensusInfo (..)
   ) where
 
+import           Data.Map           as Map
 import qualified Data.Text          as T
-
 import qualified LibLSSP.Comps.Base as Base
 
 data SetOptionsInfo = SetOptionsInfo
@@ -33,7 +33,10 @@ data RuleCustomizeInfo = RuleCustomizeInfo
   deriving ( Eq, Show, Ord )
 
 data InitialContext = InitialContext
-  { maxMoves :: Maybe Int
+  { yourTurn :: Bool
+  , board    :: [[Maybe Base.GameKoma]]
+  , colors   :: [[Bool]]
+  , hands    :: Map.Map Bool [Base.GameKoma]
   }
   deriving ( Eq, Show, Ord )
 

@@ -30,7 +30,7 @@ import qualified Data.Text                     as T
 import qualified LibLSSP.Comps.Base            as Base
 
 lexeme :: AParsec.Parser a -> AParsec.Parser a
-lexeme p = p <* AParsec.skipSpace
+lexeme p = p <* AParsec.many' asciiWSpace
 
 version :: AParsec.Parser Base.Version
 version = maybeV *> (version3a <|> version3) AParsec.<?> "version"

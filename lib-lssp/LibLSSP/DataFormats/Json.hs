@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts    #-}
+{-# LANGUAGE FlexibleInstances   #-}
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies        #-}
@@ -12,16 +13,17 @@ import qualified Data.Attoparsec.ByteString    as ABParsec
 import qualified Data.Attoparsec.Text          as AParsec
 import qualified Data.Attoparsec.Types         as AParsecT
 import qualified Data.Char                     as Char
+import qualified Data.Map                      as Map
 import           Data.Maybe                    (catMaybes)
 import qualified Data.Text                     as T
 import qualified Data.Text.Encoding            as E
 import qualified Data.Text.Lazy                as TL
 import qualified Data.Text.Lazy.Encoding       as EL
-
 import qualified LibLSSP.Comps.Base            as CB
 import qualified LibLSSP.Comps.GameCommunicate as CGC
 import qualified LibLSSP.Comps.RuleConsensus   as CRC
 import           LibLSSP.DataFormats.Base
+import           TextShow
 
 data LSSP_JSON = LSSP_JSON_1_0_0
 
@@ -127,6 +129,50 @@ instance ToJSON CB.DetailInfo where
     , "detail_message" `elemMaybe` CB.detailMessage v
     ]
 
+instance FromJSON CB.GameKoma where
+  parseJSON (String str) = return $ case str of
+      "FU" -> CB.KomaFuhyo
+      "KY" -> CB.KomaKyosha
+      "KE" -> CB.KomaKeima
+      "GI" -> CB.KomaGinsho
+      "KI" -> CB.KomaKinsho
+      "OU" -> CB.KomaOsho
+      "KA" -> CB.KomaKakugyo
+      "HI" -> CB.KomaHisha
+      "TO" -> CB.KomaTokin
+      "NK" -> CB.KomaNarikyo
+      "NI" -> CB.KomaNarikei
+      "NG" -> CB.KomaNarigin
+      "RO" -> CB.KomaRyuo
+      "RM" -> CB.KomaRyuma
+  parseJSON _ = empty
+
+instance ToJSON CB.GameKoma where
+  toJSON k = String $ case k of
+    CB.KomaFuhyo   -> "FU"
+    CB.KomaKyosha  -> "KY"
+    CB.KomaKeima   -> "KE"
+    CB.KomaGinsho  -> "GI"
+    CB.KomaKinsho  -> "KI"
+    CB.KomaOsho    -> "OU"
+    CB.KomaKakugyo -> "KA"
+    CB.KomaHisha   -> "HI"
+    CB.KomaTokin   -> "TO"
+    CB.KomaNarikyo -> "NK"
+    CB.KomaNarikei -> "NI"
+    CB.KomaNarigin -> "NG"
+    CB.KomaRyuo    -> "RO"
+    CB.KomaRyuma   -> "RM"
+
+instance FromJSON (Maybe CB.GameKoma) where
+  parseJSON v@(String str) = if str == ""
+    then return Nothing
+    else Just <$> parseJSON v
+
+instance ToJSON (Maybe CB.GameKoma) where
+  toJSON Nothing  = String ""
+  toJSON (Just k) = toJSON k
+
 instance FromJSON CRC.SetOptionsInfo where
   parseJSON (Object v)
     = CRC.SetOptionsInfo
@@ -150,25 +196,40 @@ instance ToJSON CRC.RuleCustomizeInfo where
     ]
 
 instance FromJSON CRC.InitialContext where
-  parseJSON (Object v)
+{-  parseJSON (Object v)
     = CRC.InitialContext
-    <$> paramOr (v .:) "max_moves"
+    <$> paramOr (v .:) "max_moves"-}
   parseJSON _ = empty
 
 instance ToJSON CRC.InitialContext where
   toJSON v = object $ catMaybes
-    [ "max_moves" `elemMaybe` CRC.maxMoves v
+    [ "your_turn" `elemJSON`  CRC.yourTurn v
+    , "moves"     `elemMaybe` CRC.moves    v
+    , "max_moves" `elemMaybe` CRC.maxMoves v
+    , "board"     `elemJSON`  CRC.board    v
+    , "colors"    `elemJSON`  CRC.colors   v
+    , "hands"     `elemJSON`  Map.toAscList (CRC.hands v)
     ]
 
 instance FromJSON CGC.GameContext where
-  parseJSON (Object v)
+{-  parseJSON (Object v)
     = CGC.GameContext
-    <$> paramOr (v .:) "max_moves"
+    <$> paramOr (v .:)  "your_turn"
+    <*> paramOr (v .:?) "moves"
+    <*> paramOr (v .:?) "max_moves"
+    <*> paramOr (v .:)  "board"
+    <*> paramOr (v .:)  "colors"
+    <*> paramOr (v .:)  "hands"-}
   parseJSON _ = empty
 
 instance ToJSON CGC.GameContext where
   toJSON v = object $ catMaybes
-    [ "max_moves" `elemMaybe` CGC.maxMoves v
+    [ "your_turn" `elemJSON`  CGC.yourTurn v
+    , "moves"     `elemMaybe` CGC.moves    v
+    , "max_moves" `elemMaybe` CGC.maxMoves v
+    , "board"     `elemJSON`  CGC.board    v
+    , "colors"    `elemJSON`  CGC.colors   v
+    , "hands"     `elemJSON`  Map.toAscList (CGC.hands v)
     ]
 
 instance FromJSON CGC.GameStatusResult where

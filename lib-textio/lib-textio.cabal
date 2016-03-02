@@ -1,47 +1,57 @@
-name:                shogi-server
+name:                lib-textio
 version:             0.1.0.0
-synopsis:            Initial project template from stack
+synopsis:            lekeplass standard shogi protocol library
 description:         Please see README.md
-homepage:            http://github.com/githubuser/test-shogi-hs#readme
+homepage:            http://github.com/githubuser/test-shogi-hs/lib-textio#readme
 license:             MIT
 license-file:        LICENSE
 author:              Mizunashi Mana
 maintainer:          mizunashi_mana@mma.club.uec.ac.jp
 copyright:           2015 Mizunashi Mana
-category:            Shogi
+category:            Shogi, LSSP
 build-type:          Simple
 -- extra-source-files:
 cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
+  exposed-modules:     Data.TextIO
+                     , Data.TextIO.Internal
+                     , Data.TextIO.IO
+                     , Data.TextIO.Network
+                     , Data.TextIO.SubProcess
+                     , Data.TextIO.WebSocket
   build-depends:       base >= 4.7 && < 5
-                     , lib-lssp
-                     , lib-shogi
-                     , lib-textio
-                     , attoparsec
+                     , bytestring
                      , text
                      , text-show
                      , containers
-                     , aeson
+                     , attoparsec
+                     , mtl
+                     , conduit
+                     , conduit-extra
+                     , operational
+                     , utf8-string
+                     , void
+                     , websockets
+                     , exceptions
   default-language:    Haskell2010
   ghc-options:         -Wall
 
-executable shogi-server-exe
+executable lib-textio-exe
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
-                     , shogi-server
+                     , lib-textio
   default-language:    Haskell2010
 
-test-suite shogi-server-test
+test-suite lib-textio-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       base
-                     , shogi-server
+                     , lib-textio
                      , hspec
                      , hlint
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N

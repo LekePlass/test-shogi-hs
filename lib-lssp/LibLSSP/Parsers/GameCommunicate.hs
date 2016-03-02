@@ -8,7 +8,7 @@ module LibLSSP.Parsers.GameCommunicate
 import           Control.Applicative
 import qualified Data.Attoparsec.Text          as AParsec
 import qualified Data.Text                     as T
-
+import           LibLSSP.Comps.Base            (GameKoma (..))
 import qualified LibLSSP.Comps.Base            as Base
 import           LibLSSP.Comps.GameCommunicate
 import qualified LibLSSP.Parsers.Base          as PB

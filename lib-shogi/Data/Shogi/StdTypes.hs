@@ -106,9 +106,7 @@ moveKomaByDir pid idx sc dir = idxsT ^. _1 ++ filterCanMove pid sc [head $ idxsT
     reverseIdxByPlayer GotePlayer  (ir, ic) = (-ir, -ic)
 
     canMove' :: (Int, Int) -> Bool
-    canMove' sidx = if isStdRange sidx
-      then b ! sidx == Nothing
-      else False
+    canMove' sidx = isStdRange sidx && isNothing (b ! sidx)
 
 stdMoveKoma' :: StdShogiPlayer -> ShogiKoma -> (Int, Int) -> StdShogiComp -> [(Int, Int)]
 stdMoveKoma' pid KomaFuhyo   idx sc = idxs
@@ -118,7 +116,7 @@ stdMoveKoma' pid KomaFuhyo   idx sc = idxs
 
 stdMoveKoma' pid KomaKyosha  idx sc = idxs
   where
-    idxs = concat $ map canDirMove [(1, 0)]
+    idxs = concatMap canDirMove [(1, 0)]
     canDirMove = moveKomaByDir pid idx sc
 
 stdMoveKoma' pid KomaKeima   idx sc = idxs
@@ -146,12 +144,12 @@ stdMoveKoma' pid KomaOsho    idx sc = idxs
 
 stdMoveKoma' pid KomaHisha   idx sc = idxs
   where
-    idxs = concat $ map canDirMove [(-1, 0), (0, -1), (1, 0), (0, 1)]
+    idxs = concatMap canDirMove [(-1, 0), (0, -1), (1, 0), (0, 1)]
     canDirMove = moveKomaByDir pid idx sc
 
 stdMoveKoma' pid KomaKakugyo idx sc = idxs
   where
-    idxs = concat $ map canDirMove [(-1, -1), (1, -1), (1, 1), (-1, 1)]
+    idxs = concatMap canDirMove [(-1, -1), (1, -1), (1, 1), (-1, 1)]
     canDirMove = moveKomaByDir pid idx sc
 
 stdMoveKoma' pid KomaTokin   idx sc = idxs
@@ -179,7 +177,7 @@ stdMoveKoma' pid KomaRyuo    idx sc = idxsR ++ idxsD
     idxsR = moveKomaByRange pid idx sc rs
     rs = [(-1, -1), (-1, 1), (1, 1), (1, -1)]
 
-    idxsD = concat $ map canDirMove [(-1, 0), (0, -1), (1, 0), (0, 1)]
+    idxsD = concatMap canDirMove [(-1, 0), (0, -1), (1, 0), (0, 1)]
     canDirMove = moveKomaByDir pid idx sc
 
 stdMoveKoma' pid KomaRyuma   idx sc = idxsR ++ idxsD
@@ -187,7 +185,7 @@ stdMoveKoma' pid KomaRyuma   idx sc = idxsR ++ idxsD
     idxsR = moveKomaByRange pid idx sc rs
     rs = [(-1, 0), (0, -1), (1, 0), (0, 1)]
 
-    idxsD = concat $ map canDirMove [(-1, -1), (1, -1), (1, 1), (-1, 1)]
+    idxsD = concaMap canDirMove [(-1, -1), (1, -1), (1, 1), (-1, 1)]
     canDirMove = moveKomaByDir pid idx sc
 
 stdMoveKoma :: (Int, Int) -> StdShogiComp -> [(Int, Int)]
@@ -268,8 +266,7 @@ canMoveOnBoard pid idx1 idx2 sk sc = (fromMaybe False $ do
     canChRange GotePlayer  (_, x) = x <= 3
 
 canMoveOnHands :: StdShogiPlayer -> (Int, Int) -> ShogiKoma -> StdShogiComp -> Bool
-canMoveOnHands pid idx sk sc = ohc > 0 &&
-  maybe True (const False) (b ! idx)
+canMoveOnHands pid idx sk sc = ohc > 0 && isNothing (b ! idx)
   where
     b = onboard sc
     ohs = onhands sc
