@@ -4,34 +4,43 @@ module Lib
   ( someFunc
   ) where
 
+import           Control.Monad
 import           Data.Aeson
-import           Data.Attoparsec.Text          as AP
-import qualified Data.Map                      as Map
+import           Data.Attoparsec.Text            as AP
+import qualified Data.Map                        as Map
+import           Data.Maybe
 import           Data.Shogi.Board
-import           Data.Shogi.Internal.Koma      as Koma
+import           Data.Shogi.Internal.Koma        as Koma
+import           Data.Shogi.Koma
 import           Data.Shogi.StdTypes
-import qualified Data.Text                     as T
+import qualified Data.Text                       as T
 import           Data.TextIO
-import Data.TextIO.WebSocket
+import           Data.TextIO.WebSocket
 import           LibLSSP.Comps.Base
 import           LibLSSP.Comps.GameCommunicate
+import           LibLSSP.Comps.GameEnd
 import           LibLSSP.Comps.RuleConsensus
 import           LibLSSP.DataFormats.Json
 import           LibLSSP.Parsers.Base
 import           LibLSSP.Parsers.Connect
+import           LibLSSP.Parsers.GameCommunicate
 import           LibLSSP.Parsers.RuleConsensus
 import           LibLSSP.Senders.Base
 import           LibLSSP.Senders.Connect
+import           LibLSSP.Senders.GameCommunicate
+import           LibLSSP.Senders.GameEnd
 import           LibLSSP.Senders.GameStart
 import           LibLSSP.Senders.RuleConsensus
 import           TextShow
-import LibLSSP.Senders.GameCommunicate
+
+parseMaybe :: AP.Parser a -> T.Text -> Maybe a
+parseMaybe p t = AP.maybeResult $ AP.parse p t
 
 commandPrefix :: AP.Parser T.Text
 commandPrefix = AP.takeWhile (/= ':') <* lexeme (AP.char ':')
 
 getCommandPrefix :: T.Text -> Maybe T.Text
-getCommandPrefix tx = AP.maybeResult $ AP.parse commandPrefix tx
+getCommandPrefix tx = parseMaybe commandPrefix tx
 
 getCPrefixM :: T.Text -> T.Text -> TextIO T.Text
 getCPrefixM name tx = case getCommandPrefix tx of
@@ -88,8 +97,23 @@ gameConC scomp = GameContext board colors Map.empty
       Just (Koma.Koma pid kid) -> (Just $ convKid kid, convPid pid)
       Nothing                  -> (Nothing, False)
 
-    convPid SentePlayer = True
-    convPid GotePlayer  = False
+    convPid GotePlayer  = True
+    convPid SentePlayer = False
+
+    convKid = id
+
+gameStatC :: StdShogiComp -> GameStatusResult
+gameStatC scomp = GameStatusResult board colors Map.empty
+  where
+    (board, colors) = unzip $ map (\i -> unzip $ map (lookupOnBoard' i) [1..9]) [1..9]
+
+    lookupOnBoard' :: Int -> Int -> (Maybe GameKoma, Bool)
+    lookupOnBoard' i j = case lookupOnBoard j i $ onboard scomp of
+      Just (Koma.Koma pid kid) -> (Just $ convKid kid, convPid pid)
+      Nothing                  -> (Nothing, False)
+
+    convPid GotePlayer  = True
+    convPid SentePlayer = False
 
     convKid = id
 
@@ -121,17 +145,52 @@ phase3 = do
 phase4 :: TextIO ()
 phase4 = putText $ gameStartCommand "good luck"
 
-phase5 :: StdShogiComp -> TextIO ()
-phase5 gc = do
+getActionM :: T.Text -> Maybe GameActionMoveInfo
+getActionM tx = parseMaybe (commandPrefix *> gameActionMove) tx
+
+convMoveInfo :: GameActionMoveInfo -> StdShogiMoveAction
+convMoveInfo (MoveActionOnBoard idx1 idx2 k) = ShogiMoveOnBoard idx1 idx2 k
+convMoveInfo (MoveActionOnHand  idx1      k) = ShogiMoveOnHand idx1 k
+
+phase5 :: StdShogiComp -> Int -> TextIO ()
+phase5 gc i = do
   putText $ jsonCommand "Game-Context" $ gameConC gc
   putText $ goCommand "thinking"
   pstr <- getTextLine
   tx <- getCPrefixM "Game-Action-Mode" pstr
   pstr <- getTextLine
   tx <- getCPrefixM "Game-Action-Move" pstr
-  putText $ gameStatusCommand GameContinue
-  putText $ jsonCommand "Game-Status-Result" ("" :: String)
-  phase5 gc
+  case getActionM pstr of
+    Just act -> case move SentePlayer (convMoveInfo act) gc of
+      Just ngc -> do
+        putText $ gameStatusCommand GameContinue
+        putText $ jsonCommand "Game-Status-Result" $ gameStatC ngc
+        let (i, nsc) = nextShogiComp i ngc
+        phase5 nsc (i + 1)
+      Nothing  -> do
+        putText $ gameStatusCommand GameEnd
+        putText $ jsonCommand "Game-Status-Result" $ gameStatC gc
+        putText $ gameEndCommand GameEndLose
+    Nothing  -> void $ throwParseError pstr
+
+nextShogiComp :: Int -> StdShogiComp -> (Int, StdShogiComp)
+nextShogiComp i sc = (ni, nextSC (acts !! ni) sc)
+  where
+    ni = i `mod` length acts
+
+    nextSC (idx1, idx2) sc = fromMaybe sc $ do
+      k <- lookupOnBoard' idx1
+      move GotePlayer (ShogiMoveOnBoard idx1 idx2 k) sc
+
+    lookupOnBoard' :: (Int,Int) -> Maybe ShogiKoma
+    lookupOnBoard' (i,j) = do
+      (Koma.Koma pid kid) <- lookupOnBoard i j $ onboard sc
+      return kid
+
+    acts = concat [ ownkoma [] actions (i, j) | i <- [1..9], j <- [1..9] ]
+
+    ownkoma d f idx = maybe d (\b -> if b then f idx else d) $ isOwnKoma GotePlayer idx sc
+    actions idx = map ((,) idx) $ stdMoveKoma idx sc
 
 serverIO :: TextIO ()
 serverIO = do
@@ -139,8 +198,8 @@ serverIO = do
   phase2 $ initialConC stdShogiComp
   phase3
   phase4
-  phase5 stdShogiComp
+  phase5 stdShogiComp 0
 
 someFunc :: IO ()
-someFunc = runTIOWSServer "0.0.0.0" 8888 serverIO
+someFunc = runTIOWSServer "0.0.0.0" 4000 serverIO
 --someFunc = runTIOTCPServer (serverSettings 8888 "*") serverIO

@@ -6,6 +6,7 @@ module Data.Shogi.StdTypes
   , move
   , stdMoveKoma
   , canNariKoma
+  , isOwnKoma
   ) where
 
 import           Control.Lens

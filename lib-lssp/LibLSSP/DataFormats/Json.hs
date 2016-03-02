@@ -229,12 +229,12 @@ instance ToJSON CGC.GameContext where
     ]
 
 instance FromJSON CGC.GameStatusResult where
-  parseJSON (Object v)
-    = CGC.GameStatusResult
-    <$> paramOr (v .:) "use_time"
   parseJSON _ = empty
 
 instance ToJSON CGC.GameStatusResult where
   toJSON v = object $ catMaybes
-    [ "use_time" `elemMaybe` CGC.useTime v
+    [ "board"     `elemJSON`  CGC.boardS    v
+    , "colors"    `elemJSON`  CGC.colorsS   v
+    , "hands"     `elemJSON`  Map.toAscList (CGC.handsS v)
     ]
+

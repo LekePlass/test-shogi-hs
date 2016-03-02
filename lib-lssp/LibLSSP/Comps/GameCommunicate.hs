@@ -34,5 +34,7 @@ data GameStatus
   deriving ( Eq, Show, Ord )
 
 data GameStatusResult = GameStatusResult
-  { useTime :: Maybe Int
+  { boardS  :: [[Maybe Base.GameKoma]]
+  , colorsS :: [[Bool]]
+  , handsS  :: Map.Map Bool [Base.GameKoma]
   }

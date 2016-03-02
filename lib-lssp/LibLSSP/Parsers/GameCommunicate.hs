@@ -3,6 +3,8 @@
 module LibLSSP.Parsers.GameCommunicate
   ( GameContext (..)
   , gameTime
+  , gameActionMode
+  , gameActionMove
   ) where
 
 import           Control.Applicative
@@ -57,7 +59,7 @@ komaPoint = beginBr *> mtuple <* endBr
 
     mtuple = do
       let p = PB.lexeme AParsec.decimal
-      x <- p <* AParsec.char ','
+      x <- p <* PB.lexeme (AParsec.char ',')
       let f y = (x, y)
       f <$> p AParsec.<?> "koma point"
 
